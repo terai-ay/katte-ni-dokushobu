@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NT 勝手に読書部</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F5F0E8;
+  --dark: #1C1A17;
+  --ink: #2C2820;
+  --muted: #7A7268;
+  --accent: #B5322A;
+  --accent-light: #E8C4C0;
+  --border: #D8D0C4;
+  --card-bg: #FDFAF5;
+  --serif: 'Noto Serif JP', serif;
+  --sans: 'Noto Sans JP', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+header {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 64px;
+}
+.logo {
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  text-decoration: none; color: inherit;
+}
+.logo img { height: 40px; width: 40px; object-fit: contain; }
+.logo-img-fallback {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--dark); display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-size: 13px; font-weight: 700; color: #C8A84B;
+  letter-spacing: -0.5px;
+}
+.logo-text { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.logo-sub { font-size: 11px; color: var(--muted); font-family: var(--sans); }
+nav { display: flex; align-items: center; gap: 4px; }
+nav button {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--sans); font-size: 13px; color: var(--muted);
+  padding: 8px 14px; border-radius: 6px; transition: all .2s;
+}
+nav button:hover { background: var(--cream); color: var(--ink); }
+nav button.active { color: var(--accent); font-weight: 500; }
+.btn-post {
+  background: var(--accent) !important; color: white !important;
+  border-radius: 6px !important; padding: 8px 16px !important;
+  font-weight: 500 !important; transition: opacity .2s !important;
+}
+.btn-post:hover { opacity: .85 !important; }
+
+/* ─── PAGES ─── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ─── HERO SLIDER ─── */
+.hero {
+  position: relative; overflow: hidden;
+  height: 380px; background: var(--dark);
+}
+.hero-slides { display: flex; transition: transform .6s ease; height: 100%; }
+.hero-slide {
+  min-width: 100%; height: 100%; position: relative;
+  display: flex; align-items: flex-end;
+}
+.hero-slide img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: .7;
+}
+.hero-slide-fallback {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #2C2820 0%, #4A3F35 50%, #1C1A17 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.hero-slide-fallback-text {
+  font-family: var(--serif); font-size: 64px; color: rgba(255,255,255,.05);
+  letter-spacing: 8px; user-select: none;
+}
+.hero-caption {
+  position: relative; z-index: 2;
+  padding: 24px 48px 32px;
+  background: linear-gradient(transparent, rgba(28,26,23,.8));
+  width: 100%;
+}
+.hero-caption h2 {
+  font-family: var(--serif); font-size: 26px; color: white;
+  font-weight: 700; margin-bottom: 6px;
+}
+.hero-caption p { font-size: 13px; color: rgba(255,255,255,.7); }
+.hero-dots {
+  position: absolute; bottom: 12px; right: 24px; z-index: 3;
+  display: flex; gap: 6px;
+}
+.hero-dot {
+  width: 6px; height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,.4); border: none; cursor: pointer;
+  transition: all .3s; padding: 0;
+}
+.hero-dot.active { width: 20px; background: white; }
+.hero-prev, .hero-next {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  z-index: 3; background: rgba(255,255,255,.15); border: none;
+  color: white; width: 40px; height: 40px; border-radius: 50%;
+  cursor: pointer; font-size: 18px; transition: background .2s;
+  backdrop-filter: blur(4px);
+}
+.hero-prev:hover, .hero-next:hover { background: rgba(255,255,255,.3); }
+.hero-prev { left: 16px; }
+.hero-next { right: 16px; }
+
+/* ─── SECTION ─── */
+.section { padding: 48px 32px; max-width: 1100px; margin: 0 auto; }
+.section-header {
+  display: flex; align-items: baseline; gap: 12px; margin-bottom: 28px;
+}
+.section-title {
+  font-family: var(--serif); font-size: 20px; font-weight: 700;
+  position: relative; padding-left: 16px;
+}
+.section-title::before {
+  content: ''; position: absolute; left: 0; top: 4px; bottom: 4px;
+  width: 3px; background: var(--accent); border-radius: 2px;
+}
+.section-sub { font-size: 13px; color: var(--muted); }
+
+/* ─── STORE CARDS ─── */
+.store-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.store-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+}
+.store-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(44,40,32,.1); }
+.store-card-img {
+  width: 100%; height: 160px; object-fit: cover;
+  background: var(--cream);
+  display: block;
+}
+.store-card-img-fallback {
+  width: 100%; height: 160px;
+  background: linear-gradient(135deg, var(--border) 0%, var(--cream) 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.store-card-img-fallback span { font-size: 40px; opacity: .4; }
+.store-card-body { padding: 16px; }
+.store-card-name {
+  font-family: var(--serif); font-size: 15px; font-weight: 700;
+  margin-bottom: 6px; color: var(--accent);
+}
+.store-card-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.7; }
+.store-card-count { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.btn-enter {
+  font-size: 12px; color: var(--accent); font-weight: 500;
+  display: flex; align-items: center; gap: 4px;
+}
+.btn-enter::after { content: '→'; }
+
+/* ─── NEWS ─── */
+.news-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.news-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  animation: fadeIn .4s ease;
+}
+.news-item:last-child { border-bottom: none; }
+.news-badge {
+  font-size: 10px; font-weight: 500; white-space: nowrap;
+  padding: 3px 8px; border-radius: 4px;
+  background: var(--accent-light); color: var(--accent);
+  margin-top: 1px; flex-shrink: 0;
+}
+.news-text { font-size: 13px; line-height: 1.6; color: var(--ink); }
+.news-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.news-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 13px; }
+
+/* ─── STORE DETAIL ─── */
+.store-detail-header {
+  background: var(--dark); color: white;
+  padding: 32px; position: relative; overflow: hidden;
+}
+.store-detail-header-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: .25;
+}
+.store-detail-header-inner { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
+.store-detail-icon { font-size: 36px; margin-bottom: 8px; }
+.store-detail-name {
+  font-family: var(--serif); font-size: 28px; font-weight: 700; margin-bottom: 8px;
+}
+.store-detail-desc { font-size: 14px; opacity: .75; }
+.back-btn {
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  font-family: var(--sans); font-size: 13px; color: var(--muted);
+  padding: 8px 16px; border-radius: 6px; transition: all .2s;
+  display: flex; align-items: center; gap: 6px; margin-bottom: 24px;
+}
+.back-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+/* ─── BOOK CARDS ─── */
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; }
+.book-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px; display: flex; gap: 14px;
+  animation: fadeIn .4s ease;
+}
+.book-thumb {
+  width: 60px; height: 80px; object-fit: cover; border-radius: 4px;
+  background: var(--border); flex-shrink: 0; border: 1px solid var(--border);
+}
+.book-thumb-fallback {
+  width: 60px; height: 80px; border-radius: 4px;
+  background: var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; opacity: .4;
+}
+.book-info { flex: 1; min-width: 0; }
+.book-title { font-family: var(--serif); font-size: 14px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.book-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.book-point { font-size: 12px; color: var(--ink); line-height: 1.7; margin-bottom: 8px; }
+.book-meta { display: flex; justify-content: space-between; align-items: center; }
+.book-by { font-size: 11px; color: var(--muted); }
+.book-link { font-size: 11px; color: var(--accent); text-decoration: none; }
+.book-link:hover { text-decoration: underline; }
+.book-empty { padding: 48px 32px; text-align: center; color: var(--muted); font-size: 14px; }
+
+/* ─── FORM ─── */
+.form-section {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 28px 32px;
+}
+.form-section h3 {
+  font-family: var(--serif); font-size: 17px; font-weight: 700;
+  margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 12px; color: var(--muted); font-weight: 500; }
+.form-group input, .form-group textarea, .form-group select {
+  font-family: var(--sans); font-size: 13px; color: var(--ink);
+  background: var(--cream); border: 1px solid var(--border);
+  border-radius: 6px; padding: 9px 12px; transition: border-color .2s; outline: none;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  border-color: var(--accent);
+}
+.form-group textarea { resize: vertical; min-height: 80px; line-height: 1.7; }
+.form-submit {
+  margin-top: 20px; width: 100%; padding: 12px;
+  background: var(--accent); color: white; border: none;
+  border-radius: 8px; font-family: var(--sans); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: opacity .2s;
+}
+.form-submit:hover { opacity: .85; }
+.form-note { font-size: 12px; color: var(--muted); margin-top: 10px; text-align: center; }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--dark); color: white; padding: 12px 24px;
+  border-radius: 8px; font-size: 13px; z-index: 999;
+  transition: transform .3s ease; pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .store-grid { grid-template-columns: repeat(2, 1fr); }
+  .form-grid { grid-template-columns: 1fr; }
+  header { padding: 0 16px; }
+  .hero-caption { padding: 16px 20px 24px; }
+  .section { padding: 32px 16px; }
+}
+@media (max-width: 480px) {
+  .store-grid { grid-template-columns: 1fr; }
+}
+/* ─── 削除ボタン・パスワード入力 ─── */
+.delete-row { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+.delete-pw-input {
+  font-family: var(--sans); font-size: 12px; color: var(--ink);
+  background: var(--cream); border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 10px; outline: none;
+  transition: border-color .2s; width: 140px;
+}
+.delete-pw-input:focus { border-color: var(--accent); }
+.btn-delete-confirm {
+  font-size: 11px; color: white; background: var(--accent);
+  border: none; border-radius: 4px; padding: 4px 10px;
+  cursor: pointer; font-family: var(--sans); transition: opacity .2s; white-space: nowrap;
+}
+.btn-delete-confirm:hover { opacity: .8; }
+ .furubon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; } .furubon-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; animation: fadeIn .4s ease; } .furubon-tags { display: flex; gap: 6px; margin-bottom: 10px; } .tag-give { background: #FAEEDA; color: #633806; font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 500; } .tag-lend { background: #E1F5EE; color: #085041; font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 500; } .furubon-title { font-family: var(--serif); font-size: 14px; font-weight: 700; margin-bottom: 3px; } .furubon-author { font-size: 12px; color: var(--muted); margin-bottom: 8px; } .furubon-comment { font-size: 12px; color: var(--ink); line-height: 1.7; margin-bottom: 10px; } .furubon-footer { display: flex; justify-content: space-between; align-items: center; } .furubon-by { font-size: 11px; color: var(--muted); } .furubon-done { font-size: 11px; color: var(--accent); border: 1px solid var(--accent-light); background: none; border-radius: 4px; padding: 3px 10px; cursor: pointer; font-family: var(--sans); transition: all .2s; } .furubon-done:hover { background: var(--accent); color: white; } .furubon-add-card { background: var(--card-bg); border: 1px dashed var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; min-height: 160px; transition: border-color .2s; } .furubon-add-card:hover { border-color: var(--accent); } .furubon-add-icon { font-size: 28px; color: var(--border); } .furubon-add-label { font-size: 13px; color: var(--muted); } .furubon-form { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-top: 16px; display: none; } .furubon-form.open { display: block; animation: fadeIn .3s ease; } .furubon-form h4 { font-family: var(--serif); font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+/* ─── 読みたいリスト ─── */ .yomitai-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; } .yomitai-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; border-bottom: 1px solid var(--border); animation: fadeIn .4s ease; } .yomitai-item:last-child { border-bottom: none; } .yomitai-num { font-size: 12px; color: var(--muted); min-width: 20px; text-align: center; font-family: var(--serif); } .yomitai-info { flex: 1; } .yomitai-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; } .yomitai-author { font-size: 11px; color: var(--muted); } .yomitai-by { font-size: 11px; color: var(--muted); white-space: nowrap; } .yomitai-good-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; font-family: var(--sans); transition: all .2s; white-space: nowrap; } .yomitai-good-btn:hover { border-color: #378ADD; color: #185FA5; } .yomitai-good-btn.liked { border-color: #378ADD; color: #185FA5; background: #E6F1FB; } .yomitai-add-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; } .yomitai-input { font-family: var(--sans); font-size: 13px; color: var(--ink); background: var(--cream); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; outline: none; transition: border-color .2s; } .yomitai-input:focus { border-color: #378ADD; } .yomitai-submit { padding: 9px 18px; background: #378ADD; color: white; border: none; border-radius: 6px; font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .2s; white-space: nowrap; } .yomitai-submit:hover { opacity: .85; } .yomitai-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 13px; } 
+/* ─── モーダル共通 ─── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(28,26,23,.55); z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--card-bg); border-radius: 14px;
+  width: 100%; max-width: 560px; max-height: 88vh;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--border); overflow: hidden;
+}
+.modal-header {
+  padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0;
+}
+.modal-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 20px; color: var(--muted); line-height: 1; padding: 0;
+}
+.modal-close:hover { color: var(--ink); }
+.modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+
+/* ─── 古本屋チャット ─── */
+.chat-book-info {
+  background: var(--cream); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 14px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.chat-book-img {
+  width: 48px; height: 64px; object-fit: cover;
+  border-radius: 4px; border: 1px solid var(--border); flex-shrink: 0;
+}
+.chat-book-img-fallback {
+  width: 48px; height: 64px; border-radius: 4px;
+  background: var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.chat-messages { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; min-height: 80px; }
+.chat-msg-item { display: flex; flex-direction: column; gap: 2px; }
+.chat-msg-name { font-size: 11px; color: var(--muted); }
+.chat-msg-bubble {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 0 8px 8px 8px; padding: 8px 12px;
+  font-size: 13px; line-height: 1.7; color: var(--ink);
+  max-width: 90%; align-self: flex-start;
+}
+.chat-msg-time { font-size: 10px; color: var(--muted); }
+.chat-input-row { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 14px; flex-shrink: 0; }
+.chat-name-input { width: 100px; flex-shrink: 0; }
+.chat-msg-input { flex: 1; }
+.chat-send {
+  background: var(--accent); color: white; border: none;
+  border-radius: 6px; padding: 0 16px; font-family: var(--sans);
+  font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  transition: opacity .2s;
+}
+.chat-send:hover { opacity: .85; }
+.chat-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 20px 0; }
+
+/* ─── 画像添付 ─── */
+.img-upload-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--muted); cursor: pointer;
+  border: 1px dashed var(--border); border-radius: 6px;
+  padding: 8px 14px; transition: border-color .2s;
+}
+.img-upload-label:hover { border-color: var(--accent); color: var(--accent); }
+.img-preview-thumb {
+  width: 60px; height: 80px; object-fit: cover;
+  border-radius: 4px; border: 1px solid var(--border); margin-top: 8px;
+}
+
+/* ─── poyo ─── */
+.poyo-wrap {
+  position: fixed; bottom: 24px; left: 36px; z-index: 150;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.poyo-balloon-wrap {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px 12px 0 12px; padding: 10px 14px;
+  font-size: 13px; color: var(--ink); min-width: 220px; max-width: 260px; line-height: 1.6;
+  box-shadow: 0 4px 16px rgba(28,26,23,.1);
+  animation: fadeIn .4s ease;
+}
+.poyo-img {
+  width: 88px; height: 88px; object-fit: contain; cursor: pointer;
+  transition: transform .2s; filter: drop-shadow(0 4px 8px rgba(28,26,23,.15));
+}
+.poyo-img:hover { transform: scale(1.08); }
+.poyo-img-fallback {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: var(--accent-light); border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; cursor: pointer; transition: transform .2s;
+}
+.poyo-img-fallback:hover { transform: scale(1.08); }
+
+/* ─── poyoモーダル ─── */
+.poyo-modal-balloon {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 18px; margin-bottom: 16px;
+  font-size: 14px; line-height: 1.7; color: var(--ink);
+}
+.mood-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.mood-btn {
+  background: var(--cream); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 8px; font-family: var(--sans);
+  font-size: 13px; cursor: pointer; transition: all .2s; text-align: center;
+}
+.mood-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+.poyo-result {
+  background: var(--cream); border-radius: 10px; padding: 14px 16px;
+  animation: fadeIn .4s ease; display: none;
+}
+.poyo-result.show { display: block; }
+.poyo-result-label { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.poyo-result-book { display: flex; gap: 12px; align-items: flex-start; }
+.poyo-result-img { width: 48px; height: 64px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); flex-shrink: 0; }
+.poyo-result-img-fallback { width: 48px; height: 64px; border-radius: 4px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.poyo-result-title { font-family: var(--serif); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.poyo-result-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.poyo-result-point { font-size: 13px; line-height: 1.7; color: var(--ink); }
+.poyo-retry { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 8px 16px; font-family: var(--sans); font-size: 13px; color: var(--muted); cursor: pointer; margin-top: 12px; transition: all .2s; }
+.poyo-retry:hover { border-color: var(--ink); color: var(--ink); }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" onclick="showPage('top')" href="#">
+    <img src="images/logo.png" alt="ロゴ" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="logo-img-fallback" style="display:none">NT</div>
+    <div>
+      <div class="logo-text">NT 勝手に読書部</div>
+      <div class="logo-sub">KATTE NI DOKUSHOBU</div>
+    </div>
+  </a>
+  <nav>
+    <button onclick="showPage('top')" id="nav-top" class="active">書店一覧</button>
+    <button onclick="showPage('post')" id="nav-post">投稿する</button>
+    <button onclick="showPage('news')" id="nav-news">お知らせ</button>
+  </nav>
+</header>
+
+<!-- ページ: トップ -->
+<div class="page active" id="page-top">
+
+  <!-- ヒーロースライダー -->
+  <div class="hero">
+    <div class="hero-slides" id="heroSlides">
+      <!-- スライド 1〜4 はJSで生成 -->
+    </div>
+    <button class="hero-prev" onclick="heroMove(-1)">‹</button>
+    <button class="hero-next" onclick="heroMove(1)">›</button>
+    <div class="hero-dots" id="heroDots"></div>
+  </div>
+
+  <!-- 書店一覧 -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">書店をのぞく</h2>
+      <span class="section-sub">クリックして本棚へ</span>
+    </div>
+    <div class="store-grid" id="storeGrid"></div>
+  </div>
+
+  <!-- お知らせ（最新5件） -->
+  <div class="section" style="padding-top:0">
+    <div class="section-header">
+      <h2 class="section-title">最近の入荷</h2>
+      <span class="section-sub">新しくおすすめされた本</span>
+    </div>
+    <div class="news-list" id="newsList"></div>
+  </div>
+
+</div>
+
+<!-- ページ: 書店詳細 -->
+<div class="page" id="page-store">
+  <div class="store-detail-header" id="storeDetailHeader">
+    <img id="storeDetailHeaderImg" src="" alt="" onerror="this.style.display='none'">
+    <div class="store-detail-header-inner">
+      <div class="store-detail-icon" id="storeDetailIcon"></div>
+      <div class="store-detail-name" id="storeDetailName"></div>
+      <div class="store-detail-desc" id="storeDetailDesc"></div>
+    </div>
+  </div>
+  <div class="section">
+    <button class="back-btn" onclick="showPage('top')">← 書店一覧へ戻る</button>
+
+    <!-- 本の一覧 -->
+    <div class="section-header">
+      <h2 class="section-title" id="storeDetailTitle"></h2>
+      <span class="section-sub" id="storeDetailCount"></span>
+    </div>
+    <div class="book-grid" id="bookGrid"></div>
+
+    <!-- ページ内投稿フォーム -->
+    <div class="form-section">
+      <h3>この書店に本を追加する</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>投稿者名（ニックネームOK）</label>
+          <input type="text" id="d-name" placeholder="例：田中さん">
+        </div>
+        <div class="form-group">
+          <label>書名 <span style="color:var(--accent)">*</span></label>
+          <input type="text" id="d-title" placeholder="例：三体">
+        </div>
+        <div class="form-group">
+          <label>著者名</label>
+          <input type="text" id="d-author" placeholder="例：劉 慈欣">
+        </div>
+        <div class="form-group">
+          <label>出版社名</label>
+          <input type="text" id="d-publisher" placeholder="例：早川書房">
+        </div>
+        <div class="form-group full">
+          <label>おすすめポイント</label>
+          <textarea id="d-point" placeholder="どんな人に、なぜおすすめしたいか書いてみてください"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Honya Club URL（任意）</label>
+          <input type="url" id="d-url" placeholder="https://honto.jp/...">
+        </div>
+        <div class="form-group full">
+          <label>表紙画像（任意・1.5MB以下）</label>
+          <label class="img-upload-label">
+            📷 画像を選ぶ
+            <input type="file" id="d-image" accept="image/*" style="display:none"
+              onchange="previewImage('d-image','d-image-preview')">
+          </label>
+          <img id="d-image-preview" class="img-preview-thumb" style="display:none">
+        </div>
+        <div class="form-group full">
+          <label>削除用パスワード（任意）</label>
+          <input type="password" id="d-pw" placeholder="設定しておくと後で削除できます">
+        </div>
+      </div>
+      <button class="form-submit" onclick="submitBook('detail')">この書店に投稿する</button>
+      <p class="form-note">※ 投稿はみんなで共有されます</p>
+    </div>
+  </div>
+</div>
+
+<!-- ページ: 投稿フォーム専用 -->
+<div class="page" id="page-post">
+  <div class="section" style="max-width:680px">
+    <div class="section-header">
+      <h2 class="section-title">本を投稿する</h2>
+    </div>
+    <div class="form-section">
+      <h3>おすすめの本を書店に届けよう</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>投稿者名（ニックネームOK）</label>
+          <input type="text" id="p-name" placeholder="例：田中さん">
+        </div>
+        <div class="form-group">
+          <label>書名 <span style="color:var(--accent)">*</span></label>
+          <input type="text" id="p-title" placeholder="例：三体">
+        </div>
+        <div class="form-group">
+          <label>著者名</label>
+          <input type="text" id="p-author" placeholder="例：劉 慈欣">
+        </div>
+        <div class="form-group">
+          <label>出版社名</label>
+          <input type="text" id="p-publisher" placeholder="例：早川書房">
+        </div>
+        <div class="form-group full">
+          <label>投稿先の書店 <span style="color:var(--accent)">*</span></label>
+          <select id="p-store">
+            <option value="">書店を選んでください</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>おすすめポイント</label>
+          <textarea id="p-point" placeholder="どんな人に、なぜおすすめしたいか書いてみてください"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Honya Club URL（任意）</label>
+          <input type="url" id="p-url" placeholder="https://honto.jp/...">
+        </div>
+        <div class="form-group full">
+          <label>表紙画像（任意・1.5MB以下）</label>
+          <label class="img-upload-label">
+            📷 画像を選ぶ
+            <input type="file" id="p-image" accept="image/*" style="display:none"
+              onchange="previewImage('p-image','p-image-preview')">
+          </label>
+          <img id="p-image-preview" class="img-preview-thumb" style="display:none">
+        </div>
+        <div class="form-group full">
+          <label>削除用パスワード（任意）</label>
+          <input type="password" id="p-pw" placeholder="設定しておくと後で削除できます">
+        </div>
+      </div>
+      <button class="form-submit" onclick="submitBook('post')">投稿する</button>
+      <p class="form-note">※ 投稿はみんなで共有されます。直感で書店を選んでOKです。</p>
+    </div>
+  </div>
+</div>
+
+  <!-- 古本屋 -->
+  <div class="section" style="padding-top:0">
+    <div class="section-header">
+      <h2 class="section-title">勝手に本の市</h2>
+      <span class="section-sub">譲ります・貸します</span>
+    </div>
+    <div class="furubon-grid" id="furubonGrid"></div>
+    <!-- 出品フォーム -->
+    <div class="furubon-form" id="furubonForm">
+      <h4>本を出品する</h4>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>出品者名（ニックネームOK）</label>
+          <input type="text" id="fb-name" placeholder="例：田中さん">
+        </div>
+        <div class="form-group">
+          <label>種別 <span style="color:var(--accent)">*</span></label>
+          <select id="fb-type">
+            <option value="give">あげます</option>
+            <option value="lend">貸します</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>書名 <span style="color:var(--accent)">*</span></label>
+          <input type="text" id="fb-title" placeholder="例：羊をめぐる冒険">
+        </div>
+        <div class="form-group">
+          <label>著者名</label>
+          <input type="text" id="fb-author" placeholder="例：村上春樹">
+        </div>
+        <div class="form-group full">
+          <label>ひとこと</label>
+          <input type="text" id="fb-comment" placeholder="例：読み終わったので引き取ってくれる方へ">
+        </div>
+        <div class="form-group full">
+        <label>画像（任意・1.5MB以下）</label>
+        <label class="img-upload-label">
+          📷 画像を選ぶ
+          <input type="file" id="fb-image" accept="image/*" style="display:none"
+            onchange="previewImage('fb-image','fb-image-preview')">
+        </label>
+        <img id="fb-image-preview" class="img-preview-thumb" style="display:none">
+      </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="form-submit" style="flex:1" onclick="submitFurubon()">出品する</button>
+        <button onclick="toggleFurubonForm(false)" style="padding:12px 20px;background:none;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:14px;color:var(--muted);">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 読みたいリスト -->
+  <div class="section" style="padding-top:0">
+    <div class="section-header">
+      <h2 class="section-title" style="--accent-color:#378ADD">みんなの読みたいリスト</h2>
+      <span class="section-sub">読みたい本を書き込もう</span>
+    </div>
+    <div class="yomitai-list" id="yomitaiList"></div>
+    <div class="yomitai-add-row">
+      <input class="yomitai-input" id="yt-title" placeholder="読みたい本のタイトル" style="flex:2;min-width:160px">
+      <input class="yomitai-input" id="yt-author" placeholder="著者名（任意）" style="flex:1.5;min-width:120px">
+      <input class="yomitai-input" id="yt-name" placeholder="名前（任意）" style="flex:1;min-width:100px">
+      <input class="yomitai-input" id="yt-pw" type="password" placeholder="削除用PW（任意）" style="flex:1;min-width:100px">
+      <button class="yomitai-submit" onclick="submitYomitai()">追加</button>
+    </div>
+  </div>
+<!-- ページ: お知らせ -->
+<div class="page" id="page-news">
+  <div class="section" style="max-width:760px">
+    <div class="section-header">
+      <h2 class="section-title">お知らせ</h2>
+      <span class="section-sub">新しく入荷した本の記録</span>
+    </div>
+    <div class="news-list" id="newsListFull"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────
+const STORES = [
+  { id:'nt-book',   name:'NTブックセンター',  desc:'ジャンルを問わずなんでも揃う、読書部の総合書店。', icon:'📚', img:'images/store-nt.png' },
+  { id:'inspire',   name:'インスパイアブック', desc:'専門書・ビジネス書・学術書が集まる知識の殿堂。', icon:'🔬', img:'images/store-inspire.png' },
+  { id:'comimate',  name:'コミメイト',         desc:'マンガ専門店。名作から新作まで棚がにぎわう。',     icon:'🎨', img:'images/store-comimate.png' },
+  { id:'bungaku',   name:'文学のともしび',     desc:'純文学・詩集・古典文学の灯台のような書店。',       icon:'🕯️', img:'images/store-bungaku.png' },
+  { id:'hoshi',     name:'星空書房　火星店',   desc:'SF・宇宙・未来を語る本が宇宙の彼方から届く。',     icon:'🚀', img:'images/store-hoshi.png' },
+  { id:'yami',      name:'闇夜の推理堂',       desc:'ミステリー・サスペンス・犯罪小説の専門店。',       icon:'🔍', img:'images/store-yami.png' },
+];
+
+const HERO_SLIDES = [
+  { img:'images/hero1.jpg', title:'本は、もうひとつの世界への扉', sub:'NTメンバーが選んだ一冊と出会おう' },
+  { img:'images/hero2.jpg', title:'だれかのおすすめが、あなたの人生を変えるかも', sub:'架空の書店を、あなたの投稿で育てよう' },
+  { img:'images/hero3.jpg', title:'ふらっと立ち寄る感覚で', sub:'好きな書店をのぞいてみてください' },
+  { img:'images/hero4.jpg', title:'勝手に読書部2周年。', sub:'投稿してくれるメンバーを募集中' },
+];
+
+// ─── SUPABASE ────────────────────────────────────────
+const SUPA_URL = 'https://knqidnqfprljflpgjjck.supabase.co';
+const SUPA_KEY = 'sb_publishable_rNFnJ59OPtc7kWVgQl9JGw_TIwwvcIF';
+const SUPA_HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPA_KEY,
+  'Authorization': 'Bearer ' + SUPA_KEY,
+};
+
+async function sbFetch(path, options = {}) {
+  const res = await fetch(SUPA_URL + '/rest/v1/' + path, {
+    headers: SUPA_HEADERS, ...options
+  });
+  if (!res.ok) { const e = await res.text(); console.error('Supabase error:', e); return null; }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ─── books ───────────────────────────────────────────
+async function getBooks() {
+  const data = await sbFetch('books?select=*&order=created_at.asc');
+  return (data || []).map(b => ({
+    id: String(b.id), storeId: b.store_id, title: b.title,
+    author: b.author, publisher: b.publisher, poster: b.poster,
+    point: b.point, url: b.url, password: b.password,
+    image: b.image, createdAt: b.created_at,
+  }));
+}
+async function addBook(book) {
+  await sbFetch('books', {
+    method: 'POST',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      store_id: book.storeId, title: book.title, author: book.author,
+      publisher: book.publisher, poster: book.poster, point: book.point,
+      url: book.url, password: book.password, image: book.image,
+    }),
+  });
+}
+async function deleteBookById(id) {
+  await sbFetch('books?id=eq.' + id, { method: 'DELETE' });
+}
+
+// ─── yomitai ─────────────────────────────────────────
+async function getYomitai() {
+  const data = await sbFetch('yomitai?select=*&order=likes.desc,created_at.asc');
+  return (data || []).map(y => ({
+    id: String(y.id), title: y.title, author: y.author,
+    poster: y.poster, password: y.password, likes: y.likes || 0,
+    createdAt: y.created_at,
+  }));
+}
+async function addYomitai(item) {
+  await sbFetch('yomitai', {
+    method: 'POST',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      title: item.title, author: item.author, poster: item.poster,
+      password: item.password, likes: 0,
+    }),
+  });
+}
+async function deleteYomitaiById(id) {
+  await sbFetch('yomitai?id=eq.' + id, { method: 'DELETE' });
+}
+async function updateLikes(id, likes) {
+  await sbFetch('yomitai?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ likes }),
+  });
+}
+
+// liked はブラウザに残す（個人の操作記録なのでOK）
+function getLiked() { return JSON.parse(localStorage.getItem('nt-liked') || '[]'); }
+function saveLiked(d) { localStorage.setItem('nt-liked', JSON.stringify(d)); }
+
+// 古本屋チャットはLocalStorageのまま（テキストのみなので軽量）
+function getChats(bookId) { return JSON.parse(localStorage.getItem('nt-chat-' + bookId) || '[]'); }
+function saveChats(bookId, data) { localStorage.setItem('nt-chat-' + bookId, JSON.stringify(data)); }
+
+// ─── furubon（古本屋）はLocalStorageのまま ───────────
+function getFurubon() { return JSON.parse(localStorage.getItem('nt-furubon') || '[]'); }
+function saveFurubon(d) { localStorage.setItem('nt-furubon', JSON.stringify(d)); }
+
+// ─── INIT ────────────────────────────────────────────
+let currentStore = null;
+let heroIndex = 0;
+let heroTimer = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  buildHero();
+  populateStoreSelect();
+  startPoyo();
+  buildFurubonGrid();
+  await refreshAll();
+});
+
+async function refreshAll() {
+  await buildStoreGrid();
+  await buildNewsList();
+  await buildYomitaiList();
+}
+
+// ─── HERO ────────────────────────────────────────────
+function buildHero() {
+  const slides = document.getElementById('heroSlides');
+  const dots   = document.getElementById('heroDots');
+  slides.innerHTML = '';
+  dots.innerHTML   = '';
+  HERO_SLIDES.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'hero-slide';
+    div.innerHTML = `
+      <img src="${s.img}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="hero-slide-fallback" style="display:none"><div class="hero-slide-fallback-text">本</div></div>
+      <div class="hero-caption"><h2>${s.title}</h2><p>${s.sub}</p></div>`;
+    slides.appendChild(div);
+    const dot = document.createElement('button');
+    dot.className = 'hero-dot' + (i===0?' active':'');
+    dot.onclick = () => heroGo(i);
+    dots.appendChild(dot);
+  });
+  heroTimer = setInterval(() => heroMove(1), 5000);
+}
+function heroMove(dir) {
+  heroGo((heroIndex + dir + HERO_SLIDES.length) % HERO_SLIDES.length);
+}
+function heroGo(i) {
+  heroIndex = i;
+  document.getElementById('heroSlides').style.transform = `translateX(-${i*100}%)`;
+  document.querySelectorAll('.hero-dot').forEach((d,j) => d.classList.toggle('active', j===i));
+  clearInterval(heroTimer);
+  heroTimer = setInterval(() => heroMove(1), 5000);
+}
+
+// ─── STORE GRID ──────────────────────────────────────
+async function buildStoreGrid() {
+  const books = await getBooks();
+  const grid = document.getElementById('storeGrid');
+  grid.innerHTML = '';
+  STORES.forEach(s => {
+    const count = books.filter(b => b.storeId === s.id).length;
+    const card = document.createElement('div');
+    card.className = 'store-card';
+    card.onclick = () => openStore(s.id);
+    card.innerHTML = `
+      <img class="store-card-img" src="${s.img}" alt="${s.name}"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="store-card-img-fallback" style="display:none"><span>${s.icon}</span></div>
+      <div class="store-card-body">
+        <div class="store-card-name">${s.name}</div>
+        <div class="store-card-desc">${s.desc}</div>
+        <div class="store-card-count">本棚：${count}冊</div>
+        <div class="btn-enter">書店をのぞく</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ─── NEWS LIST ───────────────────────────────────────
+async function buildNewsList() {
+  const books = (await getBooks()).slice().reverse().slice(0, 5);
+  const el = document.getElementById('newsList');
+  if (!books.length) {
+    el.innerHTML = '<div class="news-empty">まだ投稿がありません。最初の一冊を投稿してみよう！</div>';
+    return;
+  }
+  el.innerHTML = books.map(b => {
+    const store = STORES.find(s => s.id === b.storeId);
+    return `<div class="news-item">
+      <span class="news-badge">${store ? store.name : b.storeId}</span>
+      <div>
+        <div class="news-text">${b.poster ? b.poster+'さん' : '匿名'}が「${b.title}」をおすすめしました</div>
+        <div class="news-time">${formatDate(b.createdAt)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── NEWS FULL ───────────────────────────────────────
+async function buildNewsListFull() {
+  const books = (await getBooks()).slice().reverse();
+  const el = document.getElementById('newsListFull');
+  if (!books.length) {
+    el.innerHTML = '<div class="news-empty">まだ投稿がありません。</div>';
+    return;
+  }
+  el.innerHTML = books.map(b => {
+    const store = STORES.find(s => s.id === b.storeId);
+    return `<div class="news-item">
+      <span class="news-badge">${store ? store.name : b.storeId}</span>
+      <div>
+        <div class="news-text">${b.poster ? b.poster+'さん' : '匿名'}が「${b.title}」（${b.author||'著者不明'}）をおすすめしました</div>
+        <div class="news-time">${formatDate(b.createdAt)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── STORE DETAIL ────────────────────────────────────
+async function openStore(id) {
+  currentStore = STORES.find(s => s.id === id);
+  if (!currentStore) return;
+  document.getElementById('storeDetailHeaderImg').src = currentStore.img;
+  document.getElementById('storeDetailIcon').textContent = currentStore.icon;
+  document.getElementById('storeDetailName').textContent = currentStore.name;
+  document.getElementById('storeDetailDesc').textContent = currentStore.desc;
+  document.getElementById('storeDetailTitle').textContent = '本棚';
+  showPage('store');
+  await buildBookGrid(id);
+}
+async function buildBookGrid(storeId) {
+  const books = (await getBooks()).filter(b => b.storeId === storeId);
+  const grid  = document.getElementById('bookGrid');
+  const count = document.getElementById('storeDetailCount');
+  count.textContent = `${books.length}冊`;
+  if (!books.length) {
+    grid.innerHTML = `<div class="book-empty" style="grid-column:1/-1">まだ本が入荷していません。<br>最初の一冊を投稿してみよう！</div>`;
+    return;
+  }
+  grid.innerHTML = books.slice().reverse().map(b => `
+    <div class="book-card">
+      ${b.image
+        ? `<img class="book-thumb" src="${b.image}" alt="">`
+        : `<div class="book-thumb-fallback">📖</div>`}
+      <div class="book-info">
+        <div class="book-title">${b.title}</div>
+        <div class="book-author">${[b.author, b.publisher].filter(Boolean).join(' ／ ')}</div>
+        ${b.point ? `<div class="book-point">${b.point}</div>` : ''}
+        <div class="book-meta">
+          <span class="book-by">${b.poster ? 'by ' + b.poster : ''}</span>
+          ${b.url ? `<a class="book-link" href="${b.url}" target="_blank" rel="noopener">Honya Club →</a>` : ''}
+        </div>
+        ${b.password ? `
+        <div class="delete-row">
+          <input type="password" class="delete-pw-input" id="delpw-${b.id}" placeholder="削除用PW">
+          <button class="btn-delete-confirm" onclick="deleteBook('${b.id}','${storeId}')">削除</button>
+        </div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+// ─── SUBMIT ──────────────────────────────────────────
+async function submitBook(mode) {
+  const prefix  = mode === 'detail' ? 'd-' : 'p-';
+  const title   = document.getElementById(prefix+'title').value.trim();
+  const storeId = mode === 'detail' ? currentStore?.id : document.getElementById('p-store').value;
+  if (!title)   { showToast('書名を入力してください'); return; }
+  if (!storeId) { showToast('書店を選んでください'); return; }
+  const imgFile = document.getElementById(prefix+'image')?.files[0] || null;
+  const image   = await readImageAsBase64(imgFile);
+  const pw      = document.getElementById(prefix+'pw')?.value.trim() || '';
+  await addBook({
+    storeId, title, image, password: pw,
+    author:    document.getElementById(prefix+'author').value.trim(),
+    publisher: document.getElementById(prefix+'publisher').value.trim(),
+    poster:    document.getElementById(prefix+'name').value.trim(),
+    point:     document.getElementById(prefix+'point').value.trim(),
+    url:       document.getElementById(prefix+'url').value.trim(),
+  });
+  ['title','author','publisher','name','point','url','pw'].forEach(f => {
+    const el = document.getElementById(prefix+f); if (el) el.value = '';
+  });
+  const imgEl  = document.getElementById(prefix+'image'); if (imgEl) imgEl.value = '';
+  const prevEl = document.getElementById(prefix+'image-preview');
+  if (prevEl) prevEl.style.display = 'none';
+  showToast('📚 投稿しました！');
+  if (mode === 'detail') await buildBookGrid(storeId);
+  await buildStoreGrid();
+  await buildNewsList();
+}
+
+// ─── UTILS ───────────────────────────────────────────
+function populateStoreSelect() {
+  const sel = document.getElementById('p-store');
+  STORES.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id; opt.textContent = s.icon + ' ' + s.name;
+    sel.appendChild(opt);
+  });
+}
+function formatDate(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  const navBtn = document.getElementById('nav-'+(name==='store'?'top':name));
+  if (navBtn) navBtn.classList.add('active');
+  if (name === 'news') buildNewsListFull();
+  window.scrollTo(0, 0);
+}
+// ─── 古本屋 ────────────────────────────────────────
+function getFurubon() { return JSON.parse(localStorage.getItem('nt-furubon') || '[]'); }
+function saveFurubon(d) { localStorage.setItem('nt-furubon', JSON.stringify(d)); }
+
+function buildFurubonGrid() {
+  const items = getFurubon();
+  const grid = document.getElementById('furubonGrid');
+  grid.innerHTML = '';
+  items.filter(i => !i.done).forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'furubon-card';
+    card.style.cursor = 'pointer';
+    const tagClass = item.type === 'give' ? 'tag-give' : 'tag-lend';
+    const tagLabel = item.type === 'give' ? 'あげます' : '貸します';
+    const chatCount = getChats(item.id).length;
+    card.innerHTML = `
+      <div class="furubon-tags"><span class="${tagClass}">${tagLabel}</span></div>
+      ${item.image ? `<img src="${item.image}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:10px;border:1px solid var(--border);">` : ''}
+      <div class="furubon-title">${item.title}</div>
+      <div class="furubon-author">${item.author || ''}</div>
+      ${item.comment ? `<div class="furubon-comment">${item.comment}</div>` : ''}
+      <div class="furubon-footer">
+        <span class="furubon-by">${item.poster ? '出品：' + item.poster : ''}${chatCount ? `　💬 ${chatCount}` : ''}</span>
+        <span style="font-size:11px;color:var(--accent);">タップして話す →</span>
+      </div>`;
+    card.onclick = () => openChatModal(item.id);
+    grid.appendChild(card);
+  });
+  const addCard = document.createElement('div');
+  addCard.className = 'furubon-add-card';
+  addCard.onclick = () => toggleFurubonForm(true);
+  addCard.innerHTML = `<div class="furubon-add-icon">＋</div><div class="furubon-add-label">本を出品する</div>`;
+  grid.appendChild(addCard);
+}
+
+function toggleFurubonForm(open) {
+  document.getElementById('furubonForm').classList.toggle('open', open);
+  if (open) document.getElementById('furubonForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function submitFurubon() {
+  const title = document.getElementById('fb-title').value.trim();
+  if (!title) { showToast('書名を入力してください'); return; }
+  const imgFile = document.getElementById('fb-image')?.files[0] || null;
+  const image   = await readImageAsBase64(imgFile);
+  const item = {
+    id: Date.now().toString(),
+    type:    document.getElementById('fb-type').value,
+    title, image,
+    author:  document.getElementById('fb-author').value.trim(),
+    poster:  document.getElementById('fb-name').value.trim(),
+    comment: document.getElementById('fb-comment').value.trim(),
+    done:    false,
+    createdAt: new Date().toISOString(),
+  };
+  const data = getFurubon();
+  data.push(item);
+  saveFurubon(data);
+  ['fb-title','fb-author','fb-name','fb-comment'].forEach(id => document.getElementById(id).value = '');
+  const imgEl = document.getElementById('fb-image'); if (imgEl) imgEl.value = '';
+  const prevEl = document.getElementById('fb-image-preview');
+  if (prevEl) prevEl.style.display = 'none';
+  toggleFurubonForm(false);
+  buildFurubonGrid();
+  showToast('📦 出品しました！');
+}
+
+function doneFurubon(id) {
+  const data = getFurubon().map(i => i.id === id ? { ...i, done: true } : i);
+  saveFurubon(data);
+  buildFurubonGrid();
+  showToast('✅ 取引完了しました');
+}
+
+// ─── 読みたいリスト ──────────────────────────────────
+async function buildYomitaiList() {
+  const items = await getYomitai();
+  const liked = getLiked();
+  const el = document.getElementById('yomitaiList');
+  if (!items.length) {
+    el.innerHTML = '<div class="yomitai-empty">まだ登録がありません。読みたい本を書き込んでみよう！</div>';
+    return;
+  }
+  el.innerHTML = items.map((item, i) => {
+    const isLiked = liked.includes(item.id);
+    return `<div class="yomitai-item">
+      <span class="yomitai-num">${i + 1}</span>
+      <div class="yomitai-info">
+        <div class="yomitai-title">${item.title}</div>
+        <div class="yomitai-author">${item.author ? item.author : '著者不明'}${item.poster ? '　' + item.poster + 'さんが書き込み' : ''}</div>
+        ${item.password ? `
+        <div class="delete-row">
+          <input type="password" class="delete-pw-input" id="delpw-${item.id}" placeholder="削除用PW">
+          <button class="btn-delete-confirm" onclick="deleteYomitai('${item.id}')">削除</button>
+        </div>` : ''}
+      </div>
+      <button class="yomitai-good-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${item.id}','${item.likes}')">
+        👍 ${item.likes || 0}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+async function submitYomitai() {
+  const title = document.getElementById('yt-title').value.trim();
+  if (!title) { showToast('タイトルを入力してください'); return; }
+  await addYomitai({
+    title,
+    author:   document.getElementById('yt-author').value.trim(),
+    poster:   document.getElementById('yt-name').value.trim(),
+    password: document.getElementById('yt-pw')?.value.trim() || '',
+  });
+  ['yt-title','yt-author','yt-name','yt-pw'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  await buildYomitaiList();
+  showToast('📝 読みたいリストに追加しました！');
+}
+
+async function toggleLike(id, currentLikes) {
+  const liked = getLiked();
+  const isLiked = liked.includes(id);
+  const newLikes = isLiked ? Math.max(0, Number(currentLikes) - 1) : Number(currentLikes) + 1;
+  if (isLiked) { saveLiked(liked.filter(l => l !== id)); }
+  else         { saveLiked([...liked, id]); }
+  await updateLikes(id, newLikes);
+  await buildYomitaiList();
+}
+
+
+// ─── 古本屋チャット ──────────────────────────────────
+let currentChatId = null;
+
+function getChats(bookId) {
+  return JSON.parse(localStorage.getItem('nt-chat-' + bookId) || '[]');
+}
+function saveChats(bookId, data) {
+  localStorage.setItem('nt-chat-' + bookId, JSON.stringify(data));
+}
+
+function openChatModal(id) {
+  const items = getFurubon();
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  currentChatId = id;
+  const tagLabel = item.type === 'give' ? 'あげます' : '貸します';
+  const tagClass = item.type === 'give' ? 'tag-give' : 'tag-lend';
+  document.getElementById('chatModalTitle').textContent = item.title;
+  document.getElementById('chatModalSub').textContent = `${item.author || ''} ／ 出品：${item.poster || '匿名'}`;
+  document.getElementById('chatBookInfo').innerHTML = `
+    ${item.image
+      ? `<img class="chat-book-img" src="${item.image}" alt="">`
+      : `<div class="chat-book-img-fallback">📖</div>`}
+    <div>
+      <span class="${tagClass}" style="font-size:11px;padding:3px 9px;border-radius:4px;font-weight:500;display:inline-block;margin-bottom:6px;">${tagLabel}</span>
+      ${item.comment ? `<div style="font-size:13px;color:var(--ink);line-height:1.7;">${item.comment}</div>` : ''}
+    </div>`;
+  renderChats(id);
+  document.getElementById('chatModal').classList.add('open');
+}
+
+function renderChats(bookId) {
+  const chats = getChats(bookId);
+  const el = document.getElementById('chatMessages');
+  if (!chats.length) {
+    el.innerHTML = '<div class="chat-empty">まだコメントがありません。最初のメッセージを送ってみよう！</div>';
+    return;
+  }
+  el.innerHTML = chats.map(c => `
+    <div class="chat-msg-item">
+      <div class="chat-msg-name">${c.name || '匿名'}</div>
+      <div class="chat-msg-bubble">${c.text}</div>
+      <div class="chat-msg-time">${formatDate(c.createdAt)}</div>
+    </div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function sendChat() {
+  const text = document.getElementById('chatMsgInput').value.trim();
+  if (!text || !currentChatId) return;
+  const name = document.getElementById('chatName').value.trim();
+  const chats = getChats(currentChatId);
+  chats.push({ name, text, createdAt: new Date().toISOString() });
+  saveChats(currentChatId, chats);
+  document.getElementById('chatMsgInput').value = '';
+  renderChats(currentChatId);
+}
+
+function closeChatModal(e) {
+  if (e.target === document.getElementById('chatModal')) {
+    document.getElementById('chatModal').classList.remove('open');
+  }
+}
+
+function doneFurubonFromChat() {
+  if (!currentChatId) return;
+  doneFurubon(currentChatId);
+  document.getElementById('chatModal').classList.remove('open');
+}
+
+// ─── poyo ────────────────────────────────────────────
+const POYO_LINES = [
+  '今日はどんな本を読もうかな～',
+  '気分を教えてくれたらおすすめするよ！',
+  '最近なにか読んだ？',
+  'ひさしぶりに本を開いてみない？',
+  '今日の気分はどんな感じ？',
+  'すてきな一冊が待ってる！',
+  '読書部へようこそ～！',
+  'おすすめの本、見つかるといいね。',
+  'どんな気分でも本はそばにいるよ～',
+];
+const MOOD_MAP = {
+  'ぼんやり': ['NTブックセンター','文学のともしび'],
+  '熱い':     ['インスパイアブック','星空書房　火星店'],
+  'しんみり': ['文学のともしび'],
+  '笑いたい': ['コミメイト','NTブックセンター'],
+  '学びたい': ['インスパイアブック'],
+  'なんでも': null,
+};
+
+function startPoyo() {
+  const el = document.getElementById('poyoBalloon');
+  function rotate() {
+    el.textContent = POYO_LINES[Math.floor(Math.random() * POYO_LINES.length)];
+  }
+  rotate();
+  setInterval(rotate, 6000);
+}
+
+function openPoyoModal() {
+  resetPoyoModal();
+  const lines = ['今日はどんな気分？', 'どんな本を読みたい？', '気分を選んでね！'];
+  document.getElementById('poyoModalMsg').textContent = lines[Math.floor(Math.random() * lines.length)];
+  document.getElementById('poyoModal').classList.add('open');
+}
+
+function closePoyoModal(e) {
+  if (e.target === document.getElementById('poyoModal')) {
+    document.getElementById('poyoModal').classList.remove('open');
+  }
+}
+
+function resetPoyoModal() {
+  document.getElementById('moodGrid').style.display = 'grid';
+  document.getElementById('poyoResult').classList.remove('show');
+}
+
+function pickMood(mood, emoji) {
+  const storeIds = MOOD_MAP[mood];
+  const books = getBooks();
+  let pool = storeIds
+    ? books.filter(b => {
+        const store = STORES.find(s => s.id === b.storeId);
+        return store && storeIds.some(name => store.name.includes(name.replace('　火星店','')));
+      })
+    : books;
+  if (!pool.length) pool = books;
+  if (!pool.length) {
+    document.getElementById('poyoResultLabel').textContent = 'まだ投稿がありません。最初の一冊を投稿してみよう！';
+    document.getElementById('poyoResultBook').innerHTML = '';
+    document.getElementById('moodGrid').style.display = 'none';
+    document.getElementById('poyoResult').classList.add('show');
+    return;
+  }
+  const book = pool[Math.floor(Math.random() * pool.length)];
+  const store = STORES.find(s => s.id === book.storeId);
+  document.getElementById('poyoResultLabel').textContent = `${emoji} ${mood}な気分のあなたに：`;
+  document.getElementById('poyoResultBook').innerHTML = `
+    ${book.image
+      ? `<img class="poyo-result-img" src="${book.image}" alt="">`
+      : `<div class="poyo-result-img-fallback">📖</div>`}
+    <div>
+      <div class="poyo-result-title">${book.title}</div>
+      <div class="poyo-result-author">${[book.author, book.publisher].filter(Boolean).join(' ／ ')}</div>
+      ${book.point ? `<div class="poyo-result-point">${book.point}</div>` : ''}
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">${store ? store.icon + ' ' + store.name : ''} ／ ${book.poster ? 'by ' + book.poster : ''}</div>
+    </div>`;
+  document.getElementById('moodGrid').style.display = 'none';
+  document.getElementById('poyoResult').classList.add('show');
+}
+
+// ─── 削除処理 ────────────────────────────────────────
+async function deleteBook(bookId, storeId) {
+  const input   = document.getElementById('delpw-' + bookId);
+  const entered = input ? input.value : '';
+  const books   = await getBooks();
+  const book    = books.find(b => b.id === bookId);
+  if (!book) return;
+  if (book.password && book.password !== entered) {
+    showToast('パスワードが違います');
+    if (input) { input.style.borderColor = '#B5322A'; setTimeout(() => input.style.borderColor = '', 1500); }
+    return;
+  }
+  await deleteBookById(bookId);
+  showToast('🗑️ 削除しました');
+  await buildBookGrid(storeId);
+  await buildStoreGrid();
+  await buildNewsList();
+}
+
+async function deleteYomitai(itemId) {
+  const input   = document.getElementById('delpw-' + itemId);
+  const entered = input ? input.value : '';
+  const items   = await getYomitai();
+  const item    = items.find(i => i.id === itemId);
+  if (!item) return;
+  if (item.password && item.password !== entered) {
+    showToast('パスワードが違います');
+    if (input) { input.style.borderColor = '#B5322A'; setTimeout(() => input.style.borderColor = '', 1500); }
+    return;
+  }
+  await deleteYomitaiById(itemId);
+  showToast('🗑️ 削除しました');
+  await buildYomitaiList();
+}
+
+// ─── poyoのおすすめ本をSupabase対応に ─────────────────
+async function pickMood(mood, emoji) {
+  const storeIds = MOOD_MAP[mood];
+  const books = await getBooks();
+  let pool = storeIds
+    ? books.filter(b => {
+        const store = STORES.find(s => s.id === b.storeId);
+        return store && storeIds.some(name => store.name.includes(name.replace('　火星店','')));
+      })
+    : books;
+  if (!pool.length) pool = books;
+  if (!pool.length) {
+    document.getElementById('poyoResultLabel').textContent = 'まだ投稿がありません。最初の一冊を投稿してみよう！';
+    document.getElementById('poyoResultBook').innerHTML = '';
+    document.getElementById('moodGrid').style.display = 'none';
+    document.getElementById('poyoResult').classList.add('show');
+    return;
+  }
+  const book  = pool[Math.floor(Math.random() * pool.length)];
+  const store = STORES.find(s => s.id === book.storeId);
+  document.getElementById('poyoResultLabel').textContent = `${emoji} ${mood}な気分のあなたに：`;
+  document.getElementById('poyoResultBook').innerHTML = `
+    ${book.image
+      ? `<img class="poyo-result-img" src="${book.image}" alt="">`
+      : `<div class="poyo-result-img-fallback">📖</div>`}
+    <div>
+      <div class="poyo-result-title">${book.title}</div>
+      <div class="poyo-result-author">${[book.author, book.publisher].filter(Boolean).join(' ／ ')}</div>
+      ${book.point ? `<div class="poyo-result-point">${book.point}</div>` : ''}
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">${store ? store.icon + ' ' + store.name : ''} ／ ${book.poster ? 'by ' + book.poster : ''}</div>
+    </div>`;
+  document.getElementById('moodGrid').style.display = 'none';
+  document.getElementById('poyoResult').classList.add('show');
+}
+function readImageAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) { resolve(null); return; }
+    if (file.size > 1.5 * 1024 * 1024) {
+      showToast('画像は1.5MB以下にしてください'); resolve(null); return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+function previewImage(inputId, previewId) {
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    let el = document.getElementById(previewId);
+    if (!el) {
+      el = document.createElement('img');
+      el.id = previewId;
+      el.className = 'img-preview-thumb';
+      document.getElementById(inputId).parentNode.appendChild(el);
+    }
+    el.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+<!-- 古本屋チャット モーダル -->
+<div class="modal-overlay" id="chatModal" onclick="closeChatModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div style="font-family:var(--serif);font-size:16px;font-weight:700;" id="chatModalTitle"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="chatModalSub"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('chatModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="chat-book-info" id="chatBookInfo"></div>
+      <div class="chat-messages" id="chatMessages"></div>
+    </div>
+    <div style="padding:0 20px 16px;flex-shrink:0;">
+      <div class="chat-input-row">
+        <input type="text" class="form-group input chat-name-input" id="chatName" placeholder="名前（任意）"
+          style="font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 10px;outline:none;">
+        <input type="text" class="chat-msg-input" id="chatMsgInput" placeholder="メッセージを入力..."
+          style="font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 12px;outline:none;min-width:0;"
+          onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send" onclick="sendChat()">送信</button>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+        <button class="furubon-done" id="chatDoneBtn" onclick="doneFurubonFromChat()">取引完了にする</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- poyo モーダル -->
+<div class="modal-overlay" id="poyoModal" onclick="closePoyoModal(event)">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <div style="font-family:var(--serif);font-size:16px;font-weight:700;">今日の気分は？</div>
+      <button class="modal-close" onclick="document.getElementById('poyoModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="poyo-modal-balloon" id="poyoModalMsg"></div>
+      <div class="mood-grid" id="moodGrid">
+        <button class="mood-btn" onclick="pickMood('ぼんやり','😴')">😴<br>ぼんやり</button>
+        <button class="mood-btn" onclick="pickMood('熱い','🔥')">🔥<br>熱い</button>
+        <button class="mood-btn" onclick="pickMood('しんみり','😢')">😢<br>しんみり</button>
+        <button class="mood-btn" onclick="pickMood('笑いたい','😂')">😂<br>笑いたい</button>
+        <button class="mood-btn" onclick="pickMood('学びたい','🧠')">🧠<br>学びたい</button>
+        <button class="mood-btn" onclick="pickMood('なんでも','✨')">✨<br>なんでも</button>
+      </div>
+      <div class="poyo-result" id="poyoResult">
+        <div class="poyo-result-label" id="poyoResultLabel"></div>
+        <div class="poyo-result-book" id="poyoResultBook"></div>
+        <button class="poyo-retry" onclick="resetPoyoModal()">もう一度選ぶ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- poyo キャラ -->
+<div class="poyo-wrap" id="poyoWrap">
+  <div class="poyo-balloon-wrap" id="poyoBalloon"></div>
+  <img src="images/poyo.png" class="poyo-img" alt="poyo" onclick="openPoyoModal()"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+  <div class="poyo-img-fallback" style="display:none" onclick="openPoyoModal()">🐾</div>
+</div>
+
+
+</body>
+</html>
