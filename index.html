@@ -1047,6 +1047,10 @@ function showPage(name) {
   if (name === 'news') buildNewsListFull();
   window.scrollTo(0, 0);
 }
+  
+// ─── 古本屋 ────────────────────────────────────────
+function getFurubon() { return JSON.parse(localStorage.getItem('nt-furubon') || '[]'); }
+function saveFurubon(d) { localStorage.setItem('nt-furubon', JSON.stringify(d)); }
 
 async function buildFurubonGrid() {
   const items = await getFurubon();
