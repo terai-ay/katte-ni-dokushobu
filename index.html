@@ -801,7 +801,7 @@ function saveLiked(d) { localStorage.setItem('nt-liked', JSON.stringify(d)); }
 
 // 古本屋チャットはSupabase版（永続化対応）
 async function getChats(bookId) {
-  const data = await sbFetch('furubon_chats?furubon_id=eq.' + bookId + '&order=created_at.asc');
+  const data = await sbFetch('furubon_chats?select=*&furubon_id=eq.' + bookId + '&order=created_at.asc');
   return (data || []).map(c => ({
     id: String(c.id), name: c.name || '匿名', text: c.text,
     createdAt: c.created_at,
@@ -1218,6 +1218,10 @@ async function openChatModal(id) {
 async function renderChats(bookId) {
   const chats = await getChats(bookId);
   const el = document.getElementById('chatMessages');
+  if (!Array.isArray(chats)) {
+    el.innerHTML = '<div class="chat-empty">コメントの取得に失敗しました。時間をおいて再度お試しください。</div>';
+    return;
+  }
   if (!chats.length) {
     el.innerHTML = '<div class="chat-empty">まだコメントがありません。最初のメッセージを送ってみよう！</div>';
     return;
