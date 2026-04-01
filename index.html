@@ -799,9 +799,23 @@ async function updateLikes(id, likes) {
 function getLiked() { return JSON.parse(localStorage.getItem('nt-liked') || '[]'); }
 function saveLiked(d) { localStorage.setItem('nt-liked', JSON.stringify(d)); }
 
-// 古本屋チャットはLocalStorageのまま（テキストのみなので軽量）
-function getChats(bookId) { return JSON.parse(localStorage.getItem('nt-chat-' + bookId) || '[]'); }
-function saveChats(bookId, data) { localStorage.setItem('nt-chat-' + bookId, JSON.stringify(data)); }
+// 古本屋チャットはSupabase版（永続化対応）
+async function getChats(bookId) {
+  const data = await sbFetch('furubon_chats?furubon_id=eq.' + bookId + '&order=created_at.asc');
+  return (data || []).map(c => ({
+    id: String(c.id), name: c.name || '匿名', text: c.text,
+    createdAt: c.created_at,
+  }));
+}
+async function addChat(bookId, name, text) {
+  await sbFetch('furubon_chats', {
+    method: 'POST',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      furubon_id: Number(bookId), name: name || '匿名', text,
+    }),
+  });
+}
 
 // ─── furubon（古本屋）Supabase版 ─────────────────────
 async function getFurubon() {
@@ -1204,12 +1218,12 @@ async function openChatModal(id) {
       <span class="${tagClass}" style="font-size:11px;padding:3px 9px;border-radius:4px;font-weight:500;display:inline-block;margin-bottom:6px;">${tagLabel}</span>
       ${item.comment ? `<div style="font-size:13px;color:var(--ink);line-height:1.7;">${item.comment}</div>` : ''}
     </div>`;
-  renderChats(id);
+  await renderChats(id);
   document.getElementById('chatModal').classList.add('open');
 }
 
-function renderChats(bookId) {
-  const chats = getChats(bookId);
+async function renderChats(bookId) {
+  const chats = await getChats(bookId);
   const el = document.getElementById('chatMessages');
   if (!chats.length) {
     el.innerHTML = '<div class="chat-empty">まだコメントがありません。最初のメッセージを送ってみよう！</div>';
@@ -1224,15 +1238,13 @@ function renderChats(bookId) {
   el.scrollTop = el.scrollHeight;
 }
 
-function sendChat() {
+async function sendChat() {
   const text = document.getElementById('chatMsgInput').value.trim();
   if (!text || !currentChatId) return;
   const name = document.getElementById('chatName').value.trim();
-  const chats = getChats(currentChatId);
-  chats.push({ name, text, createdAt: new Date().toISOString() });
-  saveChats(currentChatId, chats);
+  await addChat(currentChatId, name, text);
   document.getElementById('chatMsgInput').value = '';
-  renderChats(currentChatId);
+  await renderChats(currentChatId);
 }
 
 function closeChatModal(e) {
