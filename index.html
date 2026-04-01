@@ -1194,13 +1194,6 @@ async function toggleLike(id, currentLikes) {
 // ─── 古本屋チャット ──────────────────────────────────
 let currentChatId = null;
 
-function getChats(bookId) {
-  return JSON.parse(localStorage.getItem('nt-chat-' + bookId) || '[]');
-}
-function saveChats(bookId, data) {
-  localStorage.setItem('nt-chat-' + bookId, JSON.stringify(data));
-}
-
 async function openChatModal(id) {
   const items = await getFurubon();
   const item = items.find(i => i.id === id);
