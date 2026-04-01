@@ -803,9 +803,33 @@ function saveLiked(d) { localStorage.setItem('nt-liked', JSON.stringify(d)); }
 function getChats(bookId) { return JSON.parse(localStorage.getItem('nt-chat-' + bookId) || '[]'); }
 function saveChats(bookId, data) { localStorage.setItem('nt-chat-' + bookId, JSON.stringify(data)); }
 
-// ─── furubon（古本屋）はLocalStorageのまま ───────────
-function getFurubon() { return JSON.parse(localStorage.getItem('nt-furubon') || '[]'); }
-function saveFurubon(d) { localStorage.setItem('nt-furubon', JSON.stringify(d)); }
+// ─── furubon（古本屋）Supabase版 ─────────────────────
+async function getFurubon() {
+  const data = await sbFetch('furubon?select=*&order=created_at.asc&done=eq.false');
+  return (data || []).map(f => ({
+    id: String(f.id), type: f.type, title: f.title,
+    author: f.author, poster: f.poster, comment: f.comment,
+    image: f.image, done: f.done, createdAt: f.created_at,
+  }));
+}
+async function addFurubon(item) {
+  await sbFetch('furubon', {
+    method: 'POST',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      type: item.type, title: item.title, author: item.author,
+      poster: item.poster, comment: item.comment, image: item.image, done: false,
+    }),
+  });
+}
+async function doneFurubonById(id) {
+  await sbFetch('furubon?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ done: true }),
+  });
+}
+
 
 // ─── INIT ────────────────────────────────────────────
 let currentStore = null;
@@ -816,7 +840,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   buildHero();
   populateStoreSelect();
   startPoyo();
-  buildFurubonGrid();
+  await buildFurubonGrid();
   await refreshAll();
 });
 
@@ -1027,11 +1051,11 @@ function showPage(name) {
 function getFurubon() { return JSON.parse(localStorage.getItem('nt-furubon') || '[]'); }
 function saveFurubon(d) { localStorage.setItem('nt-furubon', JSON.stringify(d)); }
 
-function buildFurubonGrid() {
-  const items = getFurubon();
+async function buildFurubonGrid() {
+  const items = await getFurubon();
   const grid = document.getElementById('furubonGrid');
   grid.innerHTML = '';
-  items.filter(i => !i.done).forEach(item => {
+  items.forEach(item => {
     const card = document.createElement('div');
     card.className = 'furubon-card';
     card.style.cursor = 'pointer';
@@ -1057,6 +1081,7 @@ function buildFurubonGrid() {
   addCard.innerHTML = `<div class="furubon-add-icon">＋</div><div class="furubon-add-label">本を出品する</div>`;
   grid.appendChild(addCard);
 }
+}
 
 function toggleFurubonForm(open) {
   document.getElementById('furubonForm').classList.toggle('open', open);
@@ -1068,34 +1093,36 @@ async function submitFurubon() {
   if (!title) { showToast('書名を入力してください'); return; }
   const imgFile = document.getElementById('fb-image')?.files[0] || null;
   const image   = await readImageAsBase64(imgFile);
-  const item = {
-    id: Date.now().toString(),
+  await addFurubon({
     type:    document.getElementById('fb-type').value,
     title, image,
     author:  document.getElementById('fb-author').value.trim(),
     poster:  document.getElementById('fb-name').value.trim(),
     comment: document.getElementById('fb-comment').value.trim(),
-    done:    false,
-    createdAt: new Date().toISOString(),
-  };
-  const data = getFurubon();
-  data.push(item);
-  saveFurubon(data);
-  ['fb-title','fb-author','fb-name','fb-comment'].forEach(id => document.getElementById(id).value = '');
-  const imgEl = document.getElementById('fb-image'); if (imgEl) imgEl.value = '';
+  });
+  ['fb-title','fb-author','fb-name','fb-comment'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const imgEl  = document.getElementById('fb-image'); if (imgEl) imgEl.value = '';
   const prevEl = document.getElementById('fb-image-preview');
   if (prevEl) prevEl.style.display = 'none';
   toggleFurubonForm(false);
-  buildFurubonGrid();
+  await buildFurubonGrid();
   showToast('📦 出品しました！');
 }
 
-function doneFurubon(id) {
-  const data = getFurubon().map(i => i.id === id ? { ...i, done: true } : i);
-  saveFurubon(data);
-  buildFurubonGrid();
+async function doneFurubon(id) {
+  await doneFurubonById(id);
+  await buildFurubonGrid();
   showToast('✅ 取引完了しました');
 }
+
+async function doneFurubonFromChat() {
+  if (!currentChatId) return;
+  await doneFurubon(currentChatId);
+  document.getElementById('chatModal').classList.remove('open');
+}
+
 
 // ─── 読みたいリスト ──────────────────────────────────
 async function buildYomitaiList() {
