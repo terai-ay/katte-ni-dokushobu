@@ -1049,9 +1049,6 @@ function showPage(name) {
 }
   
 // ─── 古本屋 ────────────────────────────────────────
-function getFurubon() { return JSON.parse(localStorage.getItem('nt-furubon') || '[]'); }
-function saveFurubon(d) { localStorage.setItem('nt-furubon', JSON.stringify(d)); }
-
 async function buildFurubonGrid() {
   const items = await getFurubon();
   const grid = document.getElementById('furubonGrid');
@@ -1081,7 +1078,6 @@ async function buildFurubonGrid() {
   addCard.onclick = () => toggleFurubonForm(true);
   addCard.innerHTML = `<div class="furubon-add-icon">＋</div><div class="furubon-add-label">本を出品する</div>`;
   grid.appendChild(addCard);
-}
 }
 
 function toggleFurubonForm(open) {
@@ -1191,8 +1187,8 @@ function saveChats(bookId, data) {
   localStorage.setItem('nt-chat-' + bookId, JSON.stringify(data));
 }
 
-function openChatModal(id) {
-  const items = getFurubon();
+async function openChatModal(id) {
+  const items = await getFurubon();
   const item = items.find(i => i.id === id);
   if (!item) return;
   currentChatId = id;
