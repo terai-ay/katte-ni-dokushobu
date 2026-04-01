@@ -217,11 +217,11 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .back-btn:hover { border-color: var(--ink); color: var(--ink); }
 
 /* ─── BOOK CARDS ─── */
-.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; }
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; grid-auto-rows: 1fr; }
 .book-card {
   background: var(--card-bg); border: 1px solid var(--border);
   border-radius: 10px; padding: 16px; display: flex; gap: 14px;
-  animation: fadeIn .4s ease;
+  animation: fadeIn .4s ease; align-items: stretch; height: 100%;
 }
 .book-thumb {
   width: 60px; height: 80px; object-fit: cover; border-radius: 4px;
@@ -233,11 +233,11 @@ nav button.active { color: var(--accent); font-weight: 500; }
   display: flex; align-items: center; justify-content: center;
   font-size: 22px; opacity: .4;
 }
-.book-info { flex: 1; min-width: 0; }
+.book-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .book-title { font-family: var(--serif); font-size: 14px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .book-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .book-point { font-size: 12px; color: var(--ink); line-height: 1.7; margin-bottom: 8px; }
-.book-meta { display: flex; justify-content: space-between; align-items: center; }
+.book-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
 .book-by { font-size: 11px; color: var(--muted); }
 .book-link { font-size: 11px; color: var(--accent); text-decoration: none; }
 .book-link:hover { text-decoration: underline; }
@@ -459,7 +459,6 @@ nav button.active { color: var(--accent); font-weight: 500; }
   <nav>
     <button onclick="showPage('top')" id="nav-top" class="active">書店一覧</button>
     <button onclick="showPage('post')" id="nav-post">投稿する</button>
-    <button onclick="showPage('news')" id="nav-news">お知らせ</button>
   </nav>
 </header>
 
@@ -948,9 +947,9 @@ async function buildBookGrid(storeId) {
         ? `<img class="book-thumb" src="${b.image}" alt="">`
         : `<div class="book-thumb-fallback">📖</div>`}
       <div class="book-info">
-        <div class="book-title">${b.title}</div>
+        <div class="book-title">${b.title.slice(0, 20)}${b.title.length > 20 ? '…' : ''}</div>
         <div class="book-author">${[b.author, b.publisher].filter(Boolean).join(' ／ ')}</div>
-        ${b.point ? `<div class="book-point">${b.point}</div>` : ''}
+        ${b.point ? `<div class="book-point">${b.point.slice(0, 100)}${b.point.length > 60 ? '…' : ''}</div>` : ''}
         <div class="book-meta">
           <span class="book-by">${b.poster ? 'by ' + b.poster : ''}</span>
           ${b.url ? `<a class="book-link" href="${b.url}" target="_blank" rel="noopener">Honya Club →</a>` : ''}
