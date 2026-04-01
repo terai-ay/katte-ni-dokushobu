@@ -1388,6 +1388,16 @@ function readImageAsBase64(file) {
 function previewImage(inputId, previewId) {
   const file = document.getElementById(inputId).files[0];
   if (!file) return;
+  const label = document.querySelector(`input[id="${inputId}"]`)?.closest('label')?.previousElementSibling;
+  const nameId = inputId + '-name';
+  let nameEl = document.getElementById(nameId);
+  if (!nameEl) {
+    nameEl = document.createElement('div');
+    nameEl.id = nameId;
+    nameEl.style.cssText = 'font-size:12px;color:var(--muted);margin-top:6px;';
+    document.getElementById(inputId).closest('label').after(nameEl);
+  }
+  nameEl.textContent = '📎 ' + file.name;
   const reader = new FileReader();
   reader.onload = e => {
     let el = document.getElementById(previewId);
