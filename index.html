@@ -521,6 +521,32 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
 .filter-btn.active { background: var(--dark); border-color: var(--dark); color: white; }
 
+/* ─── POYO MODE BUTTONS ─── */
+.poyo-mode-btn {
+  width: 100%; text-align: left; background: var(--cream);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; cursor: pointer; font-family: var(--sans);
+  font-size: 14px; font-weight: 500; color: var(--ink);
+  transition: all .2s; display: flex; flex-direction: column; gap: 4px;
+}
+.poyo-mode-btn span { font-size: 12px; color: var(--muted); font-weight: 400; }
+.poyo-mode-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+
+/* ─── ALL BOOKS LIST (in modal) ─── */
+.all-books-list-item {
+  display: flex; gap: 10px; align-items: stretch;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  height: 160px;
+}
+.all-books-list-item:last-child { border-bottom: none; }
+.all-books-list-text {
+  flex: 1; min-width: 0; overflow-y: auto; padding-right: 4px;
+}
+.all-books-list-text::-webkit-scrollbar { width: 5px; }
+.all-books-list-text::-webkit-scrollbar-thumb {
+  background: #c9c1b5; border-radius: 999px;
+}
+
 </style>
 </head>
 <body>
@@ -587,17 +613,6 @@ nav button.active { color: var(--accent); font-weight: 500; }
   <div class="section">
     <button class="back-btn" onclick="showPage('top')">← 書店一覧へ戻る</button>
 
-    <!-- タブバー（ブックセンターのみ表示） -->
-    <div id="storeTabBar" style="display:none">
-      <div class="store-tabs">
-        <button class="store-tab-btn active" id="tab-btn-shelf" onclick="switchStoreTab('shelf')">本棚</button>
-        <button class="store-tab-btn" id="tab-btn-all" onclick="switchStoreTab('all')">一覧表示</button>
-        <button class="store-tab-btn disabled">ランキング 🔒</button>
-      </div>
-    </div>
-
-    <!-- パネル: 本棚 -->
-    <div id="tab-panel-shelf">
     <!-- 本の一覧 -->
     <div class="section-header">
       <h2 class="section-title" id="storeDetailTitle"></h2>
@@ -650,18 +665,6 @@ nav button.active { color: var(--accent); font-weight: 500; }
       <button class="form-submit" onclick="submitBook('detail')">この書店に投稿する</button>
       <p class="form-note">※ 投稿はみんなに共有されます</p>
     </div>
-    </div><!-- /tab-panel-shelf -->
-
-    <!-- パネル: 一覧表示（全店） -->
-    <div id="tab-panel-all" style="display:none">
-      <div class="section-header" style="margin-bottom:16px;">
-        <h2 class="section-title">全店おすすめ一覧</h2>
-        <span class="section-sub" id="allBooksCount"></span>
-      </div>
-      <div class="all-books-filter" id="allBooksFilter"></div>
-      <div class="book-grid" id="allBooksGrid"></div>
-    </div><!-- /tab-panel-all -->
-
   </div>
 </div>
 
@@ -762,6 +765,10 @@ nav button.active { color: var(--accent); font-weight: 500; }
           <input type="text" id="fb-comment" placeholder="例：読み終わったので引き取ってくれる方へ">
         </div>
         <div class="form-group full">
+          <label>取引完了用パスワード（任意）</label>
+          <input type="password" id="fb-pw" placeholder="設定しておくと取引完了時に確認できます">
+        </div>
+        <div class="form-group full">
         <label>画像（任意・1.5MB以下）</label>
         <label class="img-upload-label">
           📷 画像を選ぶ
@@ -789,6 +796,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
       <input class="yomitai-input" id="yt-title" placeholder="読みたい本のタイトル" style="flex:2;min-width:160px">
       <input class="yomitai-input" id="yt-author" placeholder="著者名（任意）" style="flex:1.5;min-width:120px">
       <input class="yomitai-input" id="yt-name" placeholder="名前（任意）" style="flex:1;min-width:100px">
+      <input class="yomitai-input" id="yt-pw" type="password" placeholder="削除用PW（任意）" style="flex:1.3;min-width:130px">
       <button class="yomitai-submit" onclick="submitYomitai()">追加</button>
     </div>
   </div>
@@ -874,6 +882,7 @@ async function getYomitai() {
   return (data || []).map(y => ({
     id: String(y.id), title: y.title, author: y.author,
     poster: y.poster, likes: y.likes || 0,
+    password: y.password,
     createdAt: y.created_at,
   }));
 }
@@ -883,7 +892,7 @@ async function addYomitai(item) {
     headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
     body: JSON.stringify({
       title: item.title, author: item.author, poster: item.poster,
-      likes: 0,
+      likes: 0, password: item.password,
     }),
   });
 }
@@ -926,7 +935,7 @@ async function getFurubon() {
   return (data || []).map(f => ({
     id: String(f.id), type: f.type, title: f.title,
     author: f.author, poster: f.poster, comment: f.comment,
-    image: f.image, done: f.done, createdAt: f.created_at,
+    image: f.image, password: f.password, done: f.done, createdAt: f.created_at,
   }));
 }
 async function addFurubon(item) {
@@ -935,7 +944,8 @@ async function addFurubon(item) {
     headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
     body: JSON.stringify({
       type: item.type, title: item.title, author: item.author,
-      poster: item.poster, comment: item.comment, image: item.image, done: false,
+      poster: item.poster, comment: item.comment, image: item.image,
+      password: item.password, done: false,
     }),
   });
 }
@@ -952,6 +962,7 @@ async function doneFurubonById(id) {
 let currentStore = null;
 let heroIndex = 0;
 let heroTimer = null;
+let pendingProtectedAction = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   buildHero();
@@ -1072,19 +1083,6 @@ async function openStore(id) {
   document.getElementById('storeDetailName').textContent = currentStore.name;
   document.getElementById('storeDetailDesc').textContent = currentStore.desc;
   document.getElementById('storeDetailTitle').textContent = '本棚';
-  // ブックセンターのみタブバー表示
-  const tabBar = document.getElementById('storeTabBar');
-  if (id === 'book-book') {
-    tabBar.style.display = 'block';
-    document.getElementById('tab-panel-shelf').style.display = 'block';
-    document.getElementById('tab-panel-all').style.display = 'none';
-    document.getElementById('tab-btn-shelf').classList.add('active');
-    document.getElementById('tab-btn-all').classList.remove('active');
-  } else {
-    tabBar.style.display = 'none';
-    document.getElementById('tab-panel-shelf').style.display = 'block';
-    document.getElementById('tab-panel-all').style.display = 'none';
-  }
   showPage('store');
   await buildBookGrid(id);
 }
@@ -1118,16 +1116,8 @@ async function buildBookGrid(storeId) {
     </div>`).join('');
 }
 
-// ─── STORE TABS & ALL BOOKS ──────────────────────────
+// ─── ALL BOOKS (poyo モーダル内) ──────────────────────
 let currentAllFilter = 'all';
-
-function switchStoreTab(tab) {
-  document.getElementById('tab-panel-shelf').style.display = tab === 'shelf' ? 'block' : 'none';
-  document.getElementById('tab-panel-all').style.display   = tab === 'all'   ? 'block' : 'none';
-  document.getElementById('tab-btn-shelf').classList.toggle('active', tab === 'shelf');
-  document.getElementById('tab-btn-all').classList.toggle('active',   tab === 'all');
-  if (tab === 'all') buildAllBooksGrid(currentAllFilter);
-}
 
 async function buildAllBooksGrid(filterStoreId) {
   currentAllFilter = filterStoreId || 'all';
@@ -1141,28 +1131,24 @@ async function buildAllBooksGrid(filterStoreId) {
   const all = await getBooks();
   const books = currentAllFilter === 'all' ? all : all.filter(b => b.storeId === currentAllFilter);
   const sorted = books.slice().reverse();
-  document.getElementById('allBooksCount').textContent = `${sorted.length}冊`;
   const grid = document.getElementById('allBooksGrid');
   if (!sorted.length) {
-    grid.innerHTML = `<div class="book-empty" style="grid-column:1/-1">まだ本が投稿されていません。</div>`;
+    grid.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px 0;">まだ本が投稿されていません。</div>`;
     return;
   }
   grid.innerHTML = sorted.map(b => {
     const store = STORES.find(s => s.id === b.storeId);
     return `
-    <div class="book-card">
+    <div class="all-books-list-item">
       ${b.image
-        ? `<img class="book-thumb" src="${b.image}" alt="">`
-        : `<div class="book-thumb-fallback">📖</div>`}
-      <div class="book-info">
-        <div style="margin-bottom:6px;"><span class="news-badge news-badge--${b.storeId}" style="cursor:default;min-width:0;">${store ? store.name : b.storeId}</span></div>
-        <div class="book-title">${b.title.slice(0, 20)}${b.title.length > 20 ? '…' : ''}</div>
-        <div class="book-author">${[b.author, b.publisher].filter(Boolean).join(' ／ ')}</div>
-        ${b.point ? `<div class="book-point">${b.point}</div>` : ''}
-        <div class="book-meta">
-          <span class="book-by">${b.poster ? 'by ' + b.poster : ''}</span>
-          ${b.url ? `<a class="book-link" href="${b.url}" target="_blank" rel="noopener">Honya Club →</a>` : ''}
-        </div>
+        ? `<img style="width:44px;height:60px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0;" src="${b.image}" alt="">`
+        : `<div style="width:44px;height:60px;border-radius:4px;background:var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;">📖</div>`}
+      <div class="all-books-list-text">
+        <div style="margin-bottom:5px;"><span class="news-badge news-badge--${b.storeId}" style="cursor:default;min-width:0;display:inline-block;">${store ? store.name : b.storeId}</span></div>
+        <div style="font-family:var(--serif);font-size:13px;font-weight:700;margin-bottom:2px;">${b.title}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${[b.author, b.publisher].filter(Boolean).join(' ／ ')}</div>
+        ${b.point ? `<div style="font-size:12px;color:var(--ink);line-height:1.6;">${b.point}</div>` : ''}
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">${b.poster ? 'by ' + b.poster : ''}</div>
       </div>
     </div>`;
   }).join('');
@@ -1274,14 +1260,16 @@ async function submitFurubon() {
   if (!title) { showToast('書名を入力してください'); return; }
   const imgFile = document.getElementById('fb-image')?.files[0] || null;
   const image   = await readImageAsBase64(imgFile);
+  const pw      = document.getElementById('fb-pw')?.value.trim() || '';
   await addFurubon({
     type:    document.getElementById('fb-type').value,
     title, image,
     author:  document.getElementById('fb-author').value.trim(),
     poster:  document.getElementById('fb-name').value.trim(),
     comment: document.getElementById('fb-comment').value.trim(),
+    password: pw,
   });
-  ['fb-title','fb-author','fb-name','fb-comment'].forEach(id => {
+  ['fb-title','fb-author','fb-name','fb-comment','fb-pw'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   const imgEl  = document.getElementById('fb-image'); if (imgEl) imgEl.value = '';
@@ -1293,15 +1281,30 @@ async function submitFurubon() {
 }
 
 async function doneFurubon(id) {
+  const items = await getFurubon();
+  const item = items.find(i => i.id === id);
+  if (!item) return false;
+  if (item.password) {
+    openProtectedActionModal({
+      title: '取引完了の確認',
+      description: 'この出品を取引完了にしますか？',
+      buttonLabel: '完了にする',
+      actionType: 'furubon-done',
+      targetId: id,
+      storeId: null,
+    });
+    return false;
+  }
   await doneFurubonById(id);
   await buildFurubonGrid();
   showToast('✅ 取引完了しました');
+  return true;
 }
 
 async function doneFurubonFromChat() {
   if (!currentChatId) return;
-  await doneFurubon(currentChatId);
-  document.getElementById('chatModal').classList.remove('open');
+  const completed = await doneFurubon(currentChatId);
+  if (completed) document.getElementById('chatModal').classList.remove('open');
 }
 
 
@@ -1339,8 +1342,9 @@ async function submitYomitai() {
     title,
     author:   document.getElementById('yt-author').value.trim(),
     poster:   document.getElementById('yt-name').value.trim(),
+    password: document.getElementById('yt-pw').value.trim(),
   });
-  ['yt-title','yt-author','yt-name'].forEach(id => {
+  ['yt-title','yt-author','yt-name','yt-pw'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   await buildYomitaiList();
@@ -1418,12 +1422,6 @@ function closeChatModal(e) {
   }
 }
 
-function doneFurubonFromChat() {
-  if (!currentChatId) return;
-  doneFurubon(currentChatId);
-  document.getElementById('chatModal').classList.remove('open');
-}
-
 // ─── poyo ────────────────────────────────────────────
 const POYO_LINES = [
   '今日はどんな本を読もうかな～',
@@ -1456,8 +1454,6 @@ function startPoyo() {
 
 function openPoyoModal() {
   resetPoyoModal();
-  const lines = ['今日はどんな気分？', 'どんな本を読みたい？', '気分を選んでね！'];
-  document.getElementById('poyoModalMsg').textContent = lines[Math.floor(Math.random() * lines.length)];
   document.getElementById('poyoModal').classList.add('open');
 }
 
@@ -1468,8 +1464,36 @@ function closePoyoModal(e) {
 }
 
 function resetPoyoModal() {
+  document.getElementById('poyoModeSelect').style.display = 'block';
+  document.getElementById('poyoMoodView').style.display   = 'none';
+  document.getElementById('poyoListView').style.display   = 'none';
+  document.getElementById('poyoModalTitle').textContent   = 'Hey Poyo📱';
+  document.getElementById('poyoModalBox').style.maxWidth  = '420px';
+  document.getElementById('poyoModalBox').style.height    = '';
+}
+
+function retryMood() {
   document.getElementById('moodGrid').style.display = 'grid';
   document.getElementById('poyoResult').classList.remove('show');
+}
+
+function switchPoyoMode(mode) {
+  document.getElementById('poyoModeSelect').style.display = 'none';
+  if (mode === 'mood') {
+    document.getElementById('poyoModalTitle').textContent   = '今日の気分は？';
+    document.getElementById('poyoModalBox').style.maxWidth  = '420px';
+    document.getElementById('poyoMoodView').style.display   = 'block';
+    document.getElementById('moodGrid').style.display       = 'grid';
+    document.getElementById('poyoResult').classList.remove('show');
+    const lines = ['今日はどんな気分？', 'どんな本を読みたい？', '気分を選んでね！'];
+    document.getElementById('poyoModalMsg').textContent = lines[Math.floor(Math.random() * lines.length)];
+  } else {
+    document.getElementById('poyoModalTitle').textContent   = '全店おすすめ一覧';
+    document.getElementById('poyoModalBox').style.maxWidth  = '680px';
+    document.getElementById('poyoModalBox').style.height    = '88vh';
+    document.getElementById('poyoListView').style.display   = 'block';
+    buildAllBooksGrid('all');
+  }
 }
 
 function pickMood(mood, emoji) {
@@ -1512,15 +1536,15 @@ async function deleteBook(bookId, storeId) {
   const book = books.find(b => b.id === bookId);
   if (!book) return;
   if (book.password) {
-    // モーダルを表示
-    document.getElementById('deleteModal').classList.add('open');
-    document.getElementById('deletePwInput').value = '';
-    document.getElementById('deletePwInput').focus();
-    // グローバル変数に設定
-    window.currentDeleteBookId = bookId;
-    window.currentDeleteStoreId = storeId;
+    openProtectedActionModal({
+      title: '削除確認',
+      description: 'この本を削除しますか？',
+      buttonLabel: '削除する',
+      actionType: 'book-delete',
+      targetId: bookId,
+      storeId,
+    });
   } else {
-    // PWなしの場合は直接削除
     await deleteBookById(bookId);
     showToast('🗑️ 削除しました');
     await buildBookGrid(storeId);
@@ -1529,35 +1553,84 @@ async function deleteBook(bookId, storeId) {
   }
 }
 
+function openProtectedActionModal({ title, description, buttonLabel, actionType, targetId, storeId }) {
+  pendingProtectedAction = { actionType, targetId, storeId };
+  document.getElementById('deleteModalTitle').textContent = title;
+  document.getElementById('deleteModalDesc').textContent = description;
+  document.getElementById('deleteConfirmBtn').textContent = buttonLabel;
+  document.getElementById('deleteModal').classList.add('open');
+  document.getElementById('deletePwInput').value = '';
+  document.getElementById('deletePwInput').style.borderColor = '';
+  document.getElementById('deletePwInput').focus();
+}
+
 async function confirmDelete() {
+  if (!pendingProtectedAction) return;
   const entered = document.getElementById('deletePwInput').value;
-  const books = await getBooks();
-  const book = books.find(b => b.id === window.currentDeleteBookId);
-  if (!book) return;
-  if (book.password && entered !== book.password) {
+  let target = null;
+  if (pendingProtectedAction.actionType === 'book-delete') {
+    const books = await getBooks();
+    target = books.find(b => b.id === pendingProtectedAction.targetId);
+  } else if (pendingProtectedAction.actionType === 'yomitai-delete') {
+    const items = await getYomitai();
+    target = items.find(i => i.id === pendingProtectedAction.targetId);
+  } else if (pendingProtectedAction.actionType === 'furubon-done') {
+    const items = await getFurubon();
+    target = items.find(i => i.id === pendingProtectedAction.targetId);
+  }
+  if (!target) return;
+
+  if (target.password && entered !== target.password) {
     showToast('パスワードが違います');
     document.getElementById('deletePwInput').style.borderColor = '#B5322A';
     setTimeout(() => document.getElementById('deletePwInput').style.borderColor = '', 1500);
     return;
   }
-  await deleteBookById(window.currentDeleteBookId);
-  showToast('🗑️ 削除しました');
+
+  if (pendingProtectedAction.actionType === 'book-delete') {
+    await deleteBookById(pendingProtectedAction.targetId);
+    showToast('🗑️ 削除しました');
+    await buildBookGrid(pendingProtectedAction.storeId);
+    await buildStoreGrid();
+    await buildNewsList();
+  } else if (pendingProtectedAction.actionType === 'yomitai-delete') {
+    await deleteYomitaiById(pendingProtectedAction.targetId);
+    showToast('🗑️ 削除しました');
+    await buildYomitaiList();
+  } else if (pendingProtectedAction.actionType === 'furubon-done') {
+    await doneFurubonById(pendingProtectedAction.targetId);
+    showToast('✅ 取引完了しました');
+    await buildFurubonGrid();
+    if (currentChatId === pendingProtectedAction.targetId) {
+      document.getElementById('chatModal').classList.remove('open');
+    }
+  }
+
   document.getElementById('deleteModal').classList.remove('open');
-  await buildBookGrid(window.currentDeleteStoreId);
-  await buildStoreGrid();
-  await buildNewsList();
+  pendingProtectedAction = null;
 }
 
 function closeDeleteModal(e) {
-  if (e.target === document.getElementById('deleteModal')) {
-    document.getElementById('deleteModal').classList.remove('open');
-  }
+  if (e && e.target !== document.getElementById('deleteModal')) return;
+  document.getElementById('deleteModal').classList.remove('open');
+  pendingProtectedAction = null;
 }
 
 async function deleteYomitai(itemId) {
   const items   = await getYomitai();
   const item    = items.find(i => i.id === itemId);
   if (!item) return;
+  if (item.password) {
+    openProtectedActionModal({
+      title: '削除確認',
+      description: 'この読みたい本を削除しますか？',
+      buttonLabel: '削除する',
+      actionType: 'yomitai-delete',
+      targetId: itemId,
+      storeId: null,
+    });
+    return;
+  }
   await deleteYomitaiById(itemId);
   showToast('🗑️ 削除しました');
   await buildYomitaiList();
@@ -1671,10 +1744,10 @@ function previewImage(inputId, previewId) {
   <div class="modal-box" style="max-width:400px;">
     <div class="modal-header">
       <div>
-        <div style="font-family:var(--serif);font-size:16px;font-weight:700;">削除確認</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px;">この本を削除しますか？</div>
+        <div id="deleteModalTitle" style="font-family:var(--serif);font-size:16px;font-weight:700;">削除確認</div>
+        <div id="deleteModalDesc" style="font-size:12px;color:var(--muted);margin-top:3px;">この本を削除しますか？</div>
       </div>
-      <button class="modal-close" onclick="document.getElementById('deleteModal').classList.remove('open')">✕</button>
+      <button class="modal-close" onclick="closeDeleteModal()">✕</button>
     </div>
     <div class="modal-body">
       <div style="padding:16px 0;">
@@ -1684,7 +1757,7 @@ function previewImage(inputId, previewId) {
       </div>
     </div>
     <div style="padding:0 20px 16px;display:flex;gap:10px;justify-content:flex-end;">
-      <button onclick="document.getElementById('deleteModal').classList.remove('open')" style="padding:8px 16px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--muted);">キャンセル</button>
+      <button onclick="closeDeleteModal()" style="padding:8px 16px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--muted);">キャンセル</button>
       <button id="deleteConfirmBtn" onclick="confirmDelete()" style="padding:8px 16px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">削除する</button>
     </div>
   </div>
@@ -1692,26 +1765,54 @@ function previewImage(inputId, previewId) {
 
 <!-- poyo モーダル -->
 <div class="modal-overlay" id="poyoModal" onclick="closePoyoModal(event)">
-  <div class="modal-box" style="max-width:420px;">
+  <div class="modal-box" id="poyoModalBox" style="max-width:420px;">
     <div class="modal-header">
-      <div style="font-family:var(--serif);font-size:16px;font-weight:700;">今日の気分は？</div>
+      <div style="font-family:var(--serif);font-size:16px;font-weight:700;" id="poyoModalTitle">Hey Poyo📱</div>
       <button class="modal-close" onclick="document.getElementById('poyoModal').classList.remove('open')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="poyo-modal-balloon" id="poyoModalMsg"></div>
-      <div class="mood-grid" id="moodGrid">
-        <button class="mood-btn" onclick="pickMood('ぼんやり','😴')">😴<br>ぼんやり</button>
-        <button class="mood-btn" onclick="pickMood('熱い','🔥')">🔥<br>熱い</button>
-        <button class="mood-btn" onclick="pickMood('しんみり','😢')">😢<br>しんみり</button>
-        <button class="mood-btn" onclick="pickMood('笑いたい','😂')">😂<br>笑いたい</button>
-        <button class="mood-btn" onclick="pickMood('学びたい','🧠')">🧠<br>学びたい</button>
-        <button class="mood-btn" onclick="pickMood('なんでも','✨')">✨<br>なんでも</button>
+
+      <!-- モード選択 -->
+      <div id="poyoModeSelect">
+        <div class="poyo-modal-balloon">なにをしますか？</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+          <button class="poyo-mode-btn" onclick="switchPoyoMode('mood')">
+            🎲 気分を教える
+            <span>今日の気分でおすすめ本をピックアップ</span>
+          </button>
+          <button class="poyo-mode-btn" onclick="switchPoyoMode('list')">
+            📚 一覧表示
+            <span>全書店のおすすめ本をまとめて見る</span>
+          </button>
+        </div>
       </div>
-      <div class="poyo-result" id="poyoResult">
-        <div class="poyo-result-label" id="poyoResultLabel"></div>
-        <div class="poyo-result-book" id="poyoResultBook"></div>
-        <button class="poyo-retry" onclick="resetPoyoModal()">もう一度選ぶ</button>
+
+      <!-- 気分モード -->
+      <div id="poyoMoodView" style="display:none">
+        <div class="poyo-modal-balloon" id="poyoModalMsg"></div>
+        <div class="mood-grid" id="moodGrid">
+          <button class="mood-btn" onclick="pickMood('ぼんやり','😴')">😴<br>ぼんやり</button>
+          <button class="mood-btn" onclick="pickMood('熱い','🔥')">🔥<br>熱い</button>
+          <button class="mood-btn" onclick="pickMood('しんみり','😢')">😢<br>しんみり</button>
+          <button class="mood-btn" onclick="pickMood('笑いたい','😂')">😂<br>笑いたい</button>
+          <button class="mood-btn" onclick="pickMood('学びたい','🧠')">🧠<br>学びたい</button>
+          <button class="mood-btn" onclick="pickMood('なんでも','✨')">✨<br>なんでも</button>
+        </div>
+        <div class="poyo-result" id="poyoResult">
+          <div class="poyo-result-label" id="poyoResultLabel"></div>
+          <div class="poyo-result-book" id="poyoResultBook"></div>
+          <button class="poyo-retry" onclick="retryMood()">もう一度選ぶ</button>
+        </div>
+        <button class="poyo-retry" style="margin-top:8px;" onclick="resetPoyoModal()">← 戻る</button>
       </div>
+
+      <!-- 一覧モード -->
+      <div id="poyoListView" style="display:none">
+        <div class="all-books-filter" id="allBooksFilter" style="margin-bottom:14px;"></div>
+        <div id="allBooksGrid"></div>
+        <button class="poyo-retry" style="margin-top:12px;" onclick="resetPoyoModal()">← 戻る</button>
+      </div>
+
     </div>
   </div>
 </div>
