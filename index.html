@@ -666,6 +666,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 </div>
   
 
+<div id="commonSections">
   <!-- 古本屋 -->
   <div class="section" style="padding-top:0">
     <div class="section-header">
@@ -731,6 +732,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
       <button class="yomitai-submit" onclick="submitYomitai()">追加</button>
     </div>
   </div>
+</div>
 <!-- ページ: お知らせ -->
 <div class="page" id="page-news">
   <div class="section" style="max-width:760px">
@@ -1098,6 +1100,11 @@ function showPage(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   const navBtn = document.getElementById('nav-'+(name==='store'?'top':name));
   if (navBtn) navBtn.classList.add('active');
+
+  // 「勝手に本の市」「みんなの読みたいリスト」は投稿ページ表示時は隠す
+  const common = document.getElementById('commonSections');
+  if (common) common.style.display = (name === 'post' ? 'none' : 'block');
+
   if (name === 'news') buildNewsListFull();
   window.scrollTo(0, 0);
 }
