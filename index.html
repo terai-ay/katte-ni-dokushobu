@@ -4,7 +4,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NT 勝手に読書部</title>
+<title>勝手に読書部</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -452,7 +452,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
     <img src="images/logo.png" alt="ロゴ" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
     <div class="logo-img-fallback" style="display:none">NT</div>
     <div>
-      <div class="logo-text">NT 勝手に読書部</div>
+      <div class="logo-text">勝手に読書部</div>
       <div class="logo-sub">KATTE NI DOKUSHOBU</div>
     </div>
   </a>
@@ -801,7 +801,7 @@ function saveLiked(d) { localStorage.setItem('nt-liked', JSON.stringify(d)); }
 
 // 古本屋チャットはSupabase版（永続化対応）
 async function getChats(bookId) {
-  const data = await sbFetch('furubon_chats?select=*&furubon_id=eq.' + bookId + '&order=created_at.asc');
+  const data = await sbFetch('furubon_chats?furubon_id=eq.' + bookId + '&order=created_at.asc');
   return (data || []).map(c => ({
     id: String(c.id), name: c.name || '匿名', text: c.text,
     createdAt: c.created_at,
@@ -1218,10 +1218,6 @@ async function openChatModal(id) {
 async function renderChats(bookId) {
   const chats = await getChats(bookId);
   const el = document.getElementById('chatMessages');
-  if (!Array.isArray(chats)) {
-    el.innerHTML = '<div class="chat-empty">コメントの取得に失敗しました。時間をおいて再度お試しください。</div>';
-    return;
-  }
   if (!chats.length) {
     el.innerHTML = '<div class="chat-empty">まだコメントがありません。最初のメッセージを送ってみよう！</div>';
     return;
