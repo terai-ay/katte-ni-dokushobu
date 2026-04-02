@@ -497,6 +497,30 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .poyo-retry { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 8px 16px; font-family: var(--sans); font-size: 13px; color: var(--muted); cursor: pointer; margin-top: 12px; transition: all .2s; }
 .poyo-retry:hover { border-color: var(--ink); color: var(--ink); }
 
+/* ─── STORE TABS ─── */
+.store-tabs {
+  display: flex; border-bottom: 2px solid var(--border); margin-bottom: 28px;
+}
+.store-tab-btn {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--sans); font-size: 13px; color: var(--muted);
+  padding: 10px 20px; border-bottom: 3px solid transparent; margin-bottom: -2px;
+  transition: all .2s;
+}
+.store-tab-btn:hover { color: var(--ink); }
+.store-tab-btn.active { color: var(--accent); font-weight: 500; border-bottom-color: var(--accent); }
+.store-tab-btn.disabled { opacity: .4; cursor: default; pointer-events: none; }
+
+/* ─── ALL BOOKS FILTER ─── */
+.all-books-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+.filter-btn {
+  background: var(--cream); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 14px; font-family: var(--sans);
+  font-size: 12px; color: var(--muted); cursor: pointer; transition: all .2s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active { background: var(--dark); border-color: var(--dark); color: white; }
+
 </style>
 </head>
 <body>
@@ -563,6 +587,17 @@ nav button.active { color: var(--accent); font-weight: 500; }
   <div class="section">
     <button class="back-btn" onclick="showPage('top')">← 書店一覧へ戻る</button>
 
+    <!-- タブバー（ブックセンターのみ表示） -->
+    <div id="storeTabBar" style="display:none">
+      <div class="store-tabs">
+        <button class="store-tab-btn active" id="tab-btn-shelf" onclick="switchStoreTab('shelf')">本棚</button>
+        <button class="store-tab-btn" id="tab-btn-all" onclick="switchStoreTab('all')">一覧表示</button>
+        <button class="store-tab-btn disabled">ランキング 🔒</button>
+      </div>
+    </div>
+
+    <!-- パネル: 本棚 -->
+    <div id="tab-panel-shelf">
     <!-- 本の一覧 -->
     <div class="section-header">
       <h2 class="section-title" id="storeDetailTitle"></h2>
@@ -615,6 +650,18 @@ nav button.active { color: var(--accent); font-weight: 500; }
       <button class="form-submit" onclick="submitBook('detail')">この書店に投稿する</button>
       <p class="form-note">※ 投稿はみんなに共有されます</p>
     </div>
+    </div><!-- /tab-panel-shelf -->
+
+    <!-- パネル: 一覧表示（全店） -->
+    <div id="tab-panel-all" style="display:none">
+      <div class="section-header" style="margin-bottom:16px;">
+        <h2 class="section-title">全店おすすめ一覧</h2>
+        <span class="section-sub" id="allBooksCount"></span>
+      </div>
+      <div class="all-books-filter" id="allBooksFilter"></div>
+      <div class="book-grid" id="allBooksGrid"></div>
+    </div><!-- /tab-panel-all -->
+
   </div>
 </div>
 
@@ -1025,6 +1072,19 @@ async function openStore(id) {
   document.getElementById('storeDetailName').textContent = currentStore.name;
   document.getElementById('storeDetailDesc').textContent = currentStore.desc;
   document.getElementById('storeDetailTitle').textContent = '本棚';
+  // ブックセンターのみタブバー表示
+  const tabBar = document.getElementById('storeTabBar');
+  if (id === 'book-book') {
+    tabBar.style.display = 'block';
+    document.getElementById('tab-panel-shelf').style.display = 'block';
+    document.getElementById('tab-panel-all').style.display = 'none';
+    document.getElementById('tab-btn-shelf').classList.add('active');
+    document.getElementById('tab-btn-all').classList.remove('active');
+  } else {
+    tabBar.style.display = 'none';
+    document.getElementById('tab-panel-shelf').style.display = 'block';
+    document.getElementById('tab-panel-all').style.display = 'none';
+  }
   showPage('store');
   await buildBookGrid(id);
 }
@@ -1056,6 +1116,56 @@ async function buildBookGrid(storeId) {
         </div>` : ''}
       </div>
     </div>`).join('');
+}
+
+// ─── STORE TABS & ALL BOOKS ──────────────────────────
+let currentAllFilter = 'all';
+
+function switchStoreTab(tab) {
+  document.getElementById('tab-panel-shelf').style.display = tab === 'shelf' ? 'block' : 'none';
+  document.getElementById('tab-panel-all').style.display   = tab === 'all'   ? 'block' : 'none';
+  document.getElementById('tab-btn-shelf').classList.toggle('active', tab === 'shelf');
+  document.getElementById('tab-btn-all').classList.toggle('active',   tab === 'all');
+  if (tab === 'all') buildAllBooksGrid(currentAllFilter);
+}
+
+async function buildAllBooksGrid(filterStoreId) {
+  currentAllFilter = filterStoreId || 'all';
+  const filterList = [
+    { id: 'all', label: '全店', icon: '📋' },
+    ...STORES.map(s => ({ id: s.id, label: s.name, icon: s.icon }))
+  ];
+  document.getElementById('allBooksFilter').innerHTML = filterList.map(f =>
+    `<button class="filter-btn${currentAllFilter === f.id ? ' active' : ''}" onclick="buildAllBooksGrid('${f.id}')">${f.icon} ${f.label}</button>`
+  ).join('');
+  const all = await getBooks();
+  const books = currentAllFilter === 'all' ? all : all.filter(b => b.storeId === currentAllFilter);
+  const sorted = books.slice().reverse();
+  document.getElementById('allBooksCount').textContent = `${sorted.length}冊`;
+  const grid = document.getElementById('allBooksGrid');
+  if (!sorted.length) {
+    grid.innerHTML = `<div class="book-empty" style="grid-column:1/-1">まだ本が投稿されていません。</div>`;
+    return;
+  }
+  grid.innerHTML = sorted.map(b => {
+    const store = STORES.find(s => s.id === b.storeId);
+    return `
+    <div class="book-card">
+      ${b.image
+        ? `<img class="book-thumb" src="${b.image}" alt="">`
+        : `<div class="book-thumb-fallback">📖</div>`}
+      <div class="book-info">
+        <div style="margin-bottom:6px;"><span class="news-badge news-badge--${b.storeId}" style="cursor:default;min-width:0;">${store ? store.name : b.storeId}</span></div>
+        <div class="book-title">${b.title.slice(0, 20)}${b.title.length > 20 ? '…' : ''}</div>
+        <div class="book-author">${[b.author, b.publisher].filter(Boolean).join(' ／ ')}</div>
+        ${b.point ? `<div class="book-point">${b.point}</div>` : ''}
+        <div class="book-meta">
+          <span class="book-by">${b.poster ? 'by ' + b.poster : ''}</span>
+          ${b.url ? `<a class="book-link" href="${b.url}" target="_blank" rel="noopener">Honya Club →</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ─── SUBMIT ──────────────────────────────────────────
