@@ -471,7 +471,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 <header>
   <a class="logo" onclick="showPage('top')" href="#">
     <img src="images/logo.png?v=20260402" alt="ロゴ" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-    <div class="logo-img-fallback" style="display:none">NT</div>
+    <div class="logo-img-fallback" style="display:none"></div>
     <div>
       <div class="logo-text">勝手に読書部</div>
       <div class="logo-sub">KATTE NI DOKUSHOBU</div>
@@ -727,7 +727,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 <script>
 // ─── DATA ───────────────────────────────────────────
 const STORES = [
-  { id:'nt-book',   name:'ブックセンター',  desc:'ジャンルを問わずなんでも揃う、読書部の総合書店。', icon:'📚', img:'images/store-nt.png' },
+  { id:'book-book',   name:'ブックセンター',  desc:'ジャンルを問わずなんでも揃う、読書部の総合書店。', icon:'📚', img:'images/store-book.png' },
   { id:'inspire',   name:'インスパイアブックス', desc:'専門書・ビジネス書・学術書が集まる知識の殿堂。', icon:'🔬', img:'images/store-inspire.png' },
   { id:'comimate',  name:'コミメイト',         desc:'マンガ専門店。名作から新作まで棚がにぎわう。',     icon:'🎨', img:'images/store-comimate.png' },
   { id:'bungaku',   name:'文学のともしび',     desc:'純文学・詩集・古典文学の灯台のような書店。',       icon:'🕯️', img:'images/store-bungaku.png' },
@@ -736,10 +736,10 @@ const STORES = [
 ];
 
 const HERO_SLIDES = [
-  { img:'images/hero1.jpg', title:'本は、もうひとつの世界への扉', sub:'NTメンバーが選んだ一冊と出会おう' },
+  { img:'images/hero1.jpg', title:'本は、もうひとつの世界への扉', sub:'読書部メンバーが選んだ一冊と出会おう' },
   { img:'images/hero2.jpg', title:'だれかのおすすめが、あなたの人生を変えるかも', sub:'架空の書店を、あなたの投稿で育てよう' },
   { img:'images/hero3.jpg', title:'ふらっと立ち寄る感覚で', sub:'好きな書店をのぞいてみてください' },
-  { img:'images/hero4.jpg', title:'勝手に読書部2周年。', sub:'投稿してくれるメンバーを募集中' },
+  { img:'images/hero4.jpg', title:'勝手に読書部、2周年', sub:'メンバーを募集中' },
 ];
 
 // ─── SUPABASE ────────────────────────────────────────
@@ -816,8 +816,8 @@ async function updateLikes(id, likes) {
 }
 
 // liked はブラウザに残す（個人の操作記録なのでOK）
-function getLiked() { return JSON.parse(localStorage.getItem('nt-liked') || '[]'); }
-function saveLiked(d) { localStorage.setItem('nt-liked', JSON.stringify(d)); }
+function getLiked() { return JSON.parse(localStorage.getItem('book-liked') || '[]'); }
+function saveLiked(d) { localStorage.setItem('book-liked', JSON.stringify(d)); }
 
 // 古本屋チャットはSupabase版（永続化対応）
 async function getChats(bookId) {
