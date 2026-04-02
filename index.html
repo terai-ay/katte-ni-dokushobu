@@ -376,6 +376,26 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .chat-send:hover { opacity: .85; }
 .chat-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 20px 0; }
 
+/* ─── 投稿文スクロール表示 ─── */
+.book-point,
+.furubon-comment {
+  max-height: 6.2em;
+  overflow-y: auto;
+  padding-right: 6px;
+  word-break: break-word;
+}
+
+.book-point::-webkit-scrollbar,
+.furubon-comment::-webkit-scrollbar {
+  width: 6px;
+}
+
+.book-point::-webkit-scrollbar-thumb,
+.furubon-comment::-webkit-scrollbar-thumb {
+  background: #c9c1b5;
+  border-radius: 999px;
+}
+
 /* ─── 画像添付 ─── */
 .img-upload-label {
   display: inline-flex; align-items: center; gap: 6px;
@@ -989,7 +1009,7 @@ async function buildBookGrid(storeId) {
       <div class="book-info">
         <div class="book-title">${b.title.slice(0, 20)}${b.title.length > 20 ? '…' : ''}</div>
         <div class="book-author">${[b.author, b.publisher].filter(Boolean).join(' ／ ')}</div>
-        ${b.point ? `<div class="book-point">${b.point.slice(0, 100)}${b.point.length > 60 ? '…' : ''}</div>` : ''}
+        ${b.point ? `<div class="book-point">${b.point}</div>` : ''}
         <div class="book-meta">
           <span class="book-by">${b.poster ? 'by ' + b.poster : ''}</span>
           ${b.url ? `<a class="book-link" href="${b.url}" target="_blank" rel="noopener">Honya Club →</a>` : ''}
