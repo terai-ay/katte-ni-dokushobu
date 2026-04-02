@@ -706,7 +706,6 @@ nav button.active { color: var(--accent); font-weight: 500; }
       <input class="yomitai-input" id="yt-title" placeholder="読みたい本のタイトル" style="flex:2;min-width:160px">
       <input class="yomitai-input" id="yt-author" placeholder="著者名（任意）" style="flex:1.5;min-width:120px">
       <input class="yomitai-input" id="yt-name" placeholder="名前（任意）" style="flex:1;min-width:100px">
-      <input class="yomitai-input" id="yt-pw" type="password" placeholder="削除用PW（任意）" style="flex:1;min-width:100px">
       <button class="yomitai-submit" onclick="submitYomitai()">追加</button>
     </div>
   </div>
@@ -728,7 +727,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 // ─── DATA ───────────────────────────────────────────
 const STORES = [
   { id:'nt-book',   name:'ブックセンター',  desc:'ジャンルを問わずなんでも揃う、読書部の総合書店。', icon:'📚', img:'images/store-nt.png' },
-  { id:'inspire',   name:'インスパイアブック', desc:'専門書・ビジネス書・学術書が集まる知識の殿堂。', icon:'🔬', img:'images/store-inspire.png' },
+  { id:'inspire',   name:'インスパイアブックス', desc:'専門書・ビジネス書・学術書が集まる知識の殿堂。', icon:'🔬', img:'images/store-inspire.png' },
   { id:'comimate',  name:'コミメイト',         desc:'マンガ専門店。名作から新作まで棚がにぎわう。',     icon:'🎨', img:'images/store-comimate.png' },
   { id:'bungaku',   name:'文学のともしび',     desc:'純文学・詩集・古典文学の灯台のような書店。',       icon:'🕯️', img:'images/store-bungaku.png' },
   { id:'hoshi',     name:'星空書房　火星店',   desc:'SF・宇宙・未来を語る本が宇宙の彼方から届く。',     icon:'🚀', img:'images/store-hoshi.png' },
@@ -790,7 +789,7 @@ async function getYomitai() {
   const data = await sbFetch('yomitai?select=*&order=likes.desc,created_at.asc');
   return (data || []).map(y => ({
     id: String(y.id), title: y.title, author: y.author,
-    poster: y.poster, password: y.password, likes: y.likes || 0,
+    poster: y.poster, likes: y.likes || 0,
     createdAt: y.created_at,
   }));
 }
@@ -800,7 +799,7 @@ async function addYomitai(item) {
     headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
     body: JSON.stringify({
       title: item.title, author: item.author, poster: item.poster,
-      password: item.password, likes: 0,
+      likes: 0,
     }),
   });
 }
@@ -1170,14 +1169,12 @@ async function buildYomitaiList() {
       <div class="yomitai-info">
         <div class="yomitai-title">${item.title}</div>
         <div class="yomitai-author">${item.author ? item.author : '著者不明'}${item.poster ? '　' + item.poster + 'さんが書き込み' : ''}</div>
-        ${item.password ? `
         <div class="delete-row">
-          <input type="password" class="delete-pw-input" id="delpw-${item.id}" placeholder="削除用PW">
           <button class="btn-delete-confirm" onclick="deleteYomitai('${item.id}')">削除</button>
-        </div>` : ''}
+        </div>
       </div>
       <button class="yomitai-good-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${item.id}','${item.likes}')">
-        👍 ${item.likes || 0}
+        📍 ${item.likes || 0}
       </button>
     </div>`;
   }).join('');
@@ -1190,9 +1187,8 @@ async function submitYomitai() {
     title,
     author:   document.getElementById('yt-author').value.trim(),
     poster:   document.getElementById('yt-name').value.trim(),
-    password: document.getElementById('yt-pw')?.value.trim() || '',
   });
-  ['yt-title','yt-author','yt-name','yt-pw'].forEach(id => {
+  ['yt-title','yt-author','yt-name'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   await buildYomitaiList();
@@ -1285,10 +1281,10 @@ const POYO_LINES = [
 ];
 const MOOD_MAP = {
   'ぼんやり': ['ブックセンター','文学のともしび'],
-  '熱い':     ['インスパイアブック','星空書房　火星店'],
+  '熱い':     ['インスパイアブックス','星空書房　火星店'],
   'しんみり': ['文学のともしび'],
   '笑いたい': ['コミメイト','ブックセンター'],
-  '学びたい': ['インスパイアブック'],
+  '学びたい': ['インスパイアブックス'],
   'なんでも': null,
 };
 
@@ -1373,16 +1369,9 @@ async function deleteBook(bookId, storeId) {
 }
 
 async function deleteYomitai(itemId) {
-  const input   = document.getElementById('delpw-' + itemId);
-  const entered = input ? input.value : '';
   const items   = await getYomitai();
   const item    = items.find(i => i.id === itemId);
   if (!item) return;
-  if (item.password && item.password !== entered) {
-    showToast('パスワードが違います');
-    if (input) { input.style.borderColor = '#B5322A'; setTimeout(() => input.style.borderColor = '', 1500); }
-    return;
-  }
   await deleteYomitaiById(itemId);
   showToast('🗑️ 削除しました');
   await buildYomitaiList();
