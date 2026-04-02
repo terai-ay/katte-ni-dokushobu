@@ -77,7 +77,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .hero-slides { display: flex; transition: transform .6s ease; height: 100%; }
 .hero-slide {
   min-width: 100%; height: 100%; position: relative;
-  display: flex; align-items: flex-end;
+  display: flex; align-items: flex-end; cursor: pointer;
 }
 .hero-slide img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -182,7 +182,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .btn-enter::after { content: '→'; }
 
 /* ─── NEWS ─── */
-.news-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.news-list { background: transparent; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; }
 .news-item {
   display: flex; align-items: flex-start; gap: 12px;
   padding: 14px 20px; border-bottom: 1px solid var(--border);
@@ -231,11 +231,12 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .back-btn:hover { border-color: var(--ink); color: var(--ink); }
 
 /* ─── BOOK CARDS ─── */
-.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; grid-auto-rows: 1fr; }
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); column-gap: 16px; row-gap: 26px; margin-bottom: 40px; grid-auto-rows: 1fr; }
 .book-card {
   background: var(--card-bg); border: 1px solid var(--border);
   border-radius: 10px; padding: 16px; display: flex; gap: 14px;
   animation: fadeIn .4s ease; align-items: stretch; height: 100%;
+  position: relative; overflow: visible; padding-bottom: 26px;
 }
 .book-thumb {
   width: 60px; height: 80px; object-fit: cover; border-radius: 4px;
@@ -256,6 +257,44 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .book-link { font-size: 11px; color: var(--accent); text-decoration: none; }
 .book-link:hover { text-decoration: underline; }
 .book-empty { padding: 48px 32px; text-align: center; color: var(--muted); font-size: 14px; }
+.book-reaction-picker {
+  position: absolute; top: 10px; right: 10px; display: flex; gap: 6px;
+  opacity: 0; transform: translateY(-4px); pointer-events: none; transition: all .18s ease;
+}
+.book-card:hover .book-reaction-picker,
+.all-books-list-item:hover .book-reaction-picker {
+  opacity: 1; transform: translateY(0); pointer-events: auto;
+}
+.reaction-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; font-size: 15px; color: var(--ink); background: rgba(253,250,245,.96);
+  border: 1px solid var(--border); border-radius: 50%; cursor: pointer;
+  transition: all .2s; font-family: var(--sans); box-shadow: 0 3px 10px rgba(28,26,23,.08);
+}
+.reaction-btn:hover {
+  border-color: var(--accent); transform: translateY(-1px) scale(1.04);
+  background: white;
+}
+.reaction-btn::after {
+  content: attr(data-label); position: absolute; left: 50%; bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px); background: rgba(28,26,23,.92); color: white;
+  font-size: 11px; line-height: 1; padding: 7px 9px; border-radius: 8px;
+  white-space: nowrap; opacity: 0; pointer-events: none; transition: all .18s ease;
+}
+.reaction-btn:hover::after {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+.reaction-icon { font-size: 14px; line-height: 1; }
+.book-reaction-summary {
+  position: absolute; left: 12px; bottom: 0; transform: translateY(50%);
+  display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: 999px;
+  padding: 4px 10px; z-index: 2; box-shadow: 0 4px 10px rgba(28,26,23,.08);
+}
+.reaction-chip {
+  display: inline-flex; align-items: center; gap: 3px; font-size: 14px; color: var(--ink);
+}
+.reaction-count { font-variant-numeric: tabular-nums; }
 
 /* ─── FORM ─── */
 .form-section {
@@ -340,7 +379,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .btn-delete-confirm:hover { opacity: .8; }
 .yomitai-actions { display: flex; align-items: center; gap: 8px; }
  .furubon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; } .furubon-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; animation: fadeIn .4s ease; display: flex; flex-direction: column; } .furubon-tags { display: flex; gap: 6px; margin-bottom: 10px; } .tag-give { background: #FAEEDA; color: #633806; font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 500; } .tag-lend { background: #E1F5EE; color: #085041; font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 500; } .furubon-title { font-family: var(--serif); font-size: 14px; font-weight: 700; margin-bottom: 3px; } .furubon-author { font-size: 12px; color: var(--muted); margin-bottom: 8px; } .furubon-comment { font-size: 12px; color: var(--ink); line-height: 1.7; margin-bottom: 10px; } .furubon-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; } .furubon-by { font-size: 11px; color: var(--muted); } .furubon-done { font-size: 11px; color: var(--accent); border: 1px solid var(--accent-light); background: none; border-radius: 4px; padding: 3px 10px; cursor: pointer; font-family: var(--sans); transition: all .2s; } .furubon-done:hover { background: var(--accent); color: white; } .furubon-add-card { background: var(--card-bg); border: 1px dashed var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; min-height: 160px; transition: border-color .2s; } .furubon-add-card:hover { border-color: var(--accent); } .furubon-add-icon { font-size: 28px; color: var(--border); } .furubon-add-label { font-size: 13px; color: var(--muted); } .furubon-form { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-top: 16px; display: none; } .furubon-form.open { display: block; animation: fadeIn .3s ease; } .furubon-form h4 { font-family: var(--serif); font-size: 15px; font-weight: 700; margin-bottom: 16px; }
-/* ─── 読みたいリスト ─── */ .yomitai-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; } .yomitai-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; border-bottom: 1px solid var(--border); animation: fadeIn .4s ease; } .yomitai-item:last-child { border-bottom: none; } .yomitai-num { font-size: 12px; color: var(--muted); min-width: 20px; text-align: center; font-family: var(--serif); } .yomitai-info { flex: 1; } .yomitai-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; } .yomitai-author { font-size: 11px; color: var(--muted); } .yomitai-by { font-size: 11px; color: var(--muted); white-space: nowrap; } .yomitai-good-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; font-family: var(--sans); transition: all .2s; white-space: nowrap; } .yomitai-good-btn:hover { border-color: #378ADD; color: #185FA5; } .yomitai-good-btn.liked { border-color: #378ADD; color: #185FA5; background: #E6F1FB; } .yomitai-add-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; } .yomitai-input { font-family: var(--sans); font-size: 13px; color: var(--ink); background: var(--cream); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; outline: none; transition: border-color .2s; } .yomitai-input:focus { border-color: #378ADD; } .yomitai-submit { padding: 9px 18px; background: #378ADD; color: white; border: none; border-radius: 6px; font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .2s; white-space: nowrap; } .yomitai-submit:hover { opacity: .85; } .yomitai-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 13px; } 
+/* ─── 読みたいリスト ─── */ .yomitai-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; } .yomitai-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; border-bottom: 1px solid var(--border); animation: fadeIn .4s ease; } .yomitai-item:last-child { border-bottom: none; } .yomitai-num { font-size: 12px; color: var(--muted); min-width: 20px; text-align: center; font-family: var(--serif); } .yomitai-info { flex: 1; } .yomitai-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; } .yomitai-author { font-size: 11px; color: var(--muted); } .yomitai-by { font-size: 11px; color: var(--muted); white-space: nowrap; } .yomitai-good-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; font-family: var(--sans); transition: all .2s; white-space: nowrap; } .yomitai-good-btn:hover { border-color: #378ADD; color: #185FA5; } .yomitai-good-btn.liked { border-color: #378ADD; color: #185FA5; background: #E6F1FB; } .yomitai-add-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; } .yomitai-input { font-family: var(--sans); font-size: 13px; color: var(--ink); background: var(--cream); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; outline: none; transition: border-color .2s; } .yomitai-input:focus { border-color: var(--accent); } .yomitai-submit { padding: 9px 18px; background: var(--accent); color: white; border: none; border-radius: 6px; font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .2s; white-space: nowrap; } .yomitai-submit:hover { opacity: .85; } .yomitai-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 13px; } 
 /* ─── モーダル共通 ─── */
 .modal-overlay {
   display: none; position: fixed; inset: 0;
@@ -536,7 +575,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .all-books-list-item {
   display: flex; gap: 10px; align-items: stretch;
   padding: 12px 0; border-bottom: 1px solid var(--border);
-  height: 160px;
+  height: 160px; position: relative; overflow: visible;
 }
 .all-books-list-item:last-child { border-bottom: none; }
 .all-books-list-text {
@@ -581,7 +620,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
   </div>
 
   <!-- 書店一覧 -->
-  <div class="section">
+  <div class="section" id="section-store-list">
     <div class="section-header">
       <h2 class="section-title">書店をのぞく</h2>
       <span class="section-sub">クリックして本棚へ</span>
@@ -590,7 +629,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
   </div>
 
   <!-- お知らせ（最新5件） -->
-  <div class="section" style="padding-top:0">
+  <div class="section" id="section-news" style="padding-top:0">
     <div class="section-header">
       <h2 class="section-title">最近の入荷</h2>
       <span class="section-sub">新しくおすすめされた本</span>
@@ -731,7 +770,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 
 <div id="commonSections">
   <!-- 古本屋 -->
-  <div class="section" style="padding-top:0">
+  <div class="section" id="section-furubon" style="padding-top:0">
     <div class="section-header">
       <h2 class="section-title">勝手に本の市</h2>
       <span class="section-sub">譲ります・貸します</span>
@@ -826,11 +865,27 @@ const STORES = [
   { id:'yami',      name:'闇夜の推理堂',       desc:'ミステリー・サスペンス・犯罪小説の専門店。',       icon:'🔍', img:'images/store-yami.png' },
 ];
 
+const STORE_PLACEHOLDERS = {
+  'book-book': { title: '例：三体', author: '例：劉 慈欣', publisher: '例：早川書房' },
+  'inspire':   { title: '例：ファクトフルネス', author: '例：ハンス・ロスリング', publisher: '例：日経BP' },
+  'comimate':  { title: '例：SPY×FAMILY', author: '例：遠藤達哉', publisher: '例：集英社' },
+  'bungaku':   { title: '例：こころ', author: '例：夏目漱石', publisher: '例：新潮社' },
+  'hoshi':     { title: '例：プロジェクト・ヘイル・メアリー', author: '例：アンディ・ウィアー', publisher: '例：早川書房' },
+  'yami':      { title: '例：容疑者Xの献身', author: '例：東野圭吾', publisher: '例：文藝春秋' },
+  default:     { title: '例：三体', author: '例：劉 慈欣', publisher: '例：早川書房' },
+};
+
+const REACTION_TYPES = [
+  { key: 'read', icon: '👀', label: 'よんだ！', field: 'reactionRead' },
+  { key: 'curious', icon: '❤️', label: 'きになる！', field: 'reactionCurious' },
+  { key: 'bibibi', icon: '⚡', label: 'ビビビッ', field: 'reactionBibibi' },
+];
+
 const HERO_SLIDES = [
-  { img:'images/hero1.jpg', title:'本は、もうひとつの世界への扉', sub:'読書部メンバーが選んだ一冊と出会おう' },
-  { img:'images/hero2.jpg', title:'だれかのおすすめが、あなたの人生を変えるかも', sub:'架空の書店を、あなたの投稿で育てよう' },
-  { img:'images/hero3.jpg', title:'ふらっと立ち寄る感覚で', sub:'好きな書店をのぞいてみてください' },
-  { img:'images/hero4.jpg', title:'勝手に読書部、2周年', sub:'メンバーを募集中' },
+  { img:'images/hero1.jpg', title:'本は、もうひとつの世界への扉', sub:'読書部メンバーが選んだ一冊と出会おう', target:'section-store-list' },
+  { img:'images/hero2.jpg', title:'あなたの本が、誰かの人生を変えるかも', sub:'古本市で探してみよう', target:'section-furubon' },
+  { img:'images/hero3.jpg', title:'ふらっと立ち寄る感覚で', sub:'最近の読書部おすすめ本はコチラ', target:'section-news' },
+  { img:'images/hero4.jpg', title:'勝手に読書部、2周年。', sub:'いつでもメンバーを募集中', target:'section-store-list' },
 ];
 
 // ─── SUPABASE ────────────────────────────────────────
@@ -858,6 +913,9 @@ async function getBooks() {
     id: String(b.id), storeId: b.store_id, title: b.title,
     author: b.author, publisher: b.publisher, poster: b.poster,
     point: b.point, url: b.url, password: b.password,
+    reactionRead: b.reaction_read || 0,
+    reactionCurious: b.reaction_curious || 0,
+    reactionBibibi: b.reaction_bibibi || 0,
     image: b.image, createdAt: b.created_at,
   }));
 }
@@ -874,6 +932,13 @@ async function addBook(book) {
 }
 async function deleteBookById(id) {
   await sbFetch('books?id=eq.' + id, { method: 'DELETE' });
+}
+async function updateBookReaction(id, column, value) {
+  await sbFetch('books?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ [column]: value }),
+  });
 }
 
 // ─── yomitai ─────────────────────────────────────────
@@ -987,6 +1052,7 @@ function buildHero() {
   HERO_SLIDES.forEach((s, i) => {
     const div = document.createElement('div');
     div.className = 'hero-slide';
+    div.onclick = () => scrollToHeroTarget(s.target);
     div.innerHTML = `
       <img src="${s.img}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="hero-slide-fallback" style="display:none"><div class="hero-slide-fallback-text">本</div></div>
@@ -1008,6 +1074,25 @@ function heroGo(i) {
   document.querySelectorAll('.hero-dot').forEach((d,j) => d.classList.toggle('active', j===i));
   clearInterval(heroTimer);
   heroTimer = setInterval(() => heroMove(1), 5000);
+}
+
+function scrollToHeroTarget(targetId) {
+  if (!targetId) return;
+  const scrollToSection = () => {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    const headerOffset = 76;
+    const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  };
+
+  const topPage = document.getElementById('page-top');
+  if (!topPage.classList.contains('active')) {
+    showPage('top');
+    setTimeout(scrollToSection, 30);
+    return;
+  }
+  scrollToSection();
 }
 
 // ─── STORE GRID ──────────────────────────────────────
@@ -1083,6 +1168,7 @@ async function openStore(id) {
   document.getElementById('storeDetailName').textContent = currentStore.name;
   document.getElementById('storeDetailDesc').textContent = currentStore.desc;
   document.getElementById('storeDetailTitle').textContent = '本棚';
+  applyStorePlaceholders(id, 'd-');
   showPage('store');
   await buildBookGrid(id);
 }
@@ -1097,6 +1183,7 @@ async function buildBookGrid(storeId) {
   }
   grid.innerHTML = books.slice().reverse().map(b => `
     <div class="book-card">
+      ${renderReactionPicker(b, 'detail')}
       ${b.image
         ? `<img class="book-thumb" src="${b.image}" alt="">`
         : `<div class="book-thumb-fallback">📖</div>`}
@@ -1108,10 +1195,11 @@ async function buildBookGrid(storeId) {
           <span class="book-by">${b.poster ? 'by ' + b.poster : ''}</span>
           ${b.url ? `<a class="book-link" href="${b.url}" target="_blank" rel="noopener">Honya Club →</a>` : ''}
         </div>
-        ${b.password ? `
+        ${renderReactionSummary(b)}
+        ${`
         <div class="delete-row">
           <button class="btn-delete-confirm" onclick="deleteBook('${b.id}','${storeId}')">削除</button>
-        </div>` : ''}
+        </div>`}
       </div>
     </div>`).join('');
 }
@@ -1140,6 +1228,7 @@ async function buildAllBooksGrid(filterStoreId) {
     const store = STORES.find(s => s.id === b.storeId);
     return `
     <div class="all-books-list-item">
+      ${renderReactionPicker(b, 'all')}
       ${b.image
         ? `<img style="width:44px;height:60px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0;" src="${b.image}" alt="">`
         : `<div style="width:44px;height:60px;border-radius:4px;background:var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;">📖</div>`}
@@ -1152,6 +1241,52 @@ async function buildAllBooksGrid(filterStoreId) {
       </div>
     </div>`;
   }).join('');
+}
+
+function renderReactionPicker(book, context) {
+  return `
+    <div class="book-reaction-picker">
+      ${REACTION_TYPES.map(reaction => `
+        <button class="reaction-btn" type="button"
+          data-label="${reaction.label}"
+          onclick="handleReactionClick('${book.id}','${reaction.key}',${Number(book[reaction.field] || 0)},'${context}','${book.storeId}')">
+          <span class="reaction-icon">${reaction.icon}</span>
+        </button>`).join('')}
+    </div>`;
+}
+
+function renderReactionSummary(book) {
+  const active = REACTION_TYPES.filter(reaction => Number(book[reaction.field] || 0) > 0);
+  if (!active.length) return '';
+  return `
+    <div class="book-reaction-summary">
+      ${active.map(reaction => {
+        const count = Number(book[reaction.field] || 0);
+        return `<span class="reaction-chip">${reaction.icon}${count >= 2 ? ` <span class="reaction-count">${count}</span>` : ''}</span>`;
+      }).join('')}
+    </div>`;
+}
+
+async function handleReactionClick(bookId, reactionKey, currentCount, context, storeId) {
+  const columnMap = {
+    read: 'reaction_read',
+    curious: 'reaction_curious',
+    bibibi: 'reaction_bibibi',
+  };
+  const labelMap = {
+    read: '👀 よんだ！',
+    curious: '❤️ きになる！',
+    bibibi: '⚡ ビビビッ',
+  };
+  const column = columnMap[reactionKey];
+  if (!column) return;
+  await updateBookReaction(bookId, column, Number(currentCount || 0) + 1);
+  showToast(labelMap[reactionKey] + ' を追加しました');
+  if (context === 'detail') {
+    await buildBookGrid(storeId);
+  } else {
+    await buildAllBooksGrid(currentAllFilter);
+  }
 }
 
 // ─── SUBMIT ──────────────────────────────────────────
@@ -1192,6 +1327,18 @@ function populateStoreSelect() {
     opt.value = s.id; opt.textContent = s.icon + ' ' + s.name;
     sel.appendChild(opt);
   });
+  sel.onchange = () => applyStorePlaceholders(sel.value, 'p-');
+  applyStorePlaceholders('', 'p-');
+}
+
+function applyStorePlaceholders(storeId, prefix) {
+  const data = STORE_PLACEHOLDERS[storeId] || STORE_PLACEHOLDERS.default;
+  const titleEl = document.getElementById(prefix + 'title');
+  const authorEl = document.getElementById(prefix + 'author');
+  const publisherEl = document.getElementById(prefix + 'publisher');
+  if (titleEl) titleEl.placeholder = data.title;
+  if (authorEl) authorEl.placeholder = data.author;
+  if (publisherEl) publisherEl.placeholder = data.publisher;
 }
 function formatDate(iso) {
   const d = new Date(iso);
