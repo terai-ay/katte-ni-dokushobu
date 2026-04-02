@@ -167,7 +167,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
   font-family: var(--serif); font-size: 15px; font-weight: 700;
   margin-bottom: 6px; color: var(--ink);
 }
-.store-card-name--nt-book  { color: #5C4A32; }
+.store-card-name--book-book { color: #5C4A32; }
 .store-card-name--inspire  { color: #2E4D5C; }
 .store-card-name--comimate { color: #5C2E4A; }
 .store-card-name--bungaku  { color: #3D2E5C; }
@@ -194,8 +194,9 @@ nav button.active { color: var(--accent); font-weight: 500; }
   padding: 3px 8px; border-radius: 4px;
   background: var(--accent-light); color: var(--accent);
   margin-top: 1px; flex-shrink: 0;
+  min-width: 8em; text-align: center;
 }
-.news-badge--nt-book   { background: #EDE8DF; color: #5C4A32; }
+.news-badge--book-book { background: #EDE8DF; color: #5C4A32; }
 .news-badge--inspire   { background: #DDE4E8; color: #2E4D5C; }
 .news-badge--comimate  { background: #E8DDE4; color: #5C2E4A; }
 .news-badge--bungaku   { background: #E2DDE8; color: #3D2E5C; }
@@ -739,7 +740,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
 <script>
 // ─── DATA ───────────────────────────────────────────
 const STORES = [
-  { id:'nt-book',   name:'ブックセンター',  desc:'ジャンルを問わずなんでも揃う、読書部の総合書店。', icon:'📚', img:'images/store-book.png' },
+  { id:'book-book',  name:'ブックセンター',  desc:'ジャンルを問わずなんでも揃う、読書部の総合書店。', icon:'📚', img:'images/store-book.png' },
   { id:'inspire',   name:'インスパイアブックス', desc:'専門書・ビジネス書・学術書が集まる知識の殿堂。', icon:'🔬', img:'images/store-inspire.png' },
   { id:'comimate',  name:'コミメイト',         desc:'マンガ専門店。名作から新作まで棚がにぎわう。',     icon:'🎨', img:'images/store-comimate.png' },
   { id:'bungaku',   name:'文学のともしび',     desc:'純文学・詩集・古典文学の灯台のような書店。',       icon:'🕯️', img:'images/store-bungaku.png' },
