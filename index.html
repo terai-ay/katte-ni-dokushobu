@@ -234,22 +234,33 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); column-gap: 16px; row-gap: 26px; margin-bottom: 40px; grid-auto-rows: 1fr; }
 .book-card {
   background: var(--card-bg); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px; display: flex; gap: 14px;
+  border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px;
   animation: fadeIn .4s ease; align-items: stretch; height: 100%;
   position: relative; overflow: visible; padding-bottom: 26px;
 }
 .book-thumb {
-  width: 60px; height: 80px; object-fit: cover; border-radius: 4px;
-  background: var(--border); flex-shrink: 0; border: 1px solid var(--border);
+  width: min(120px, 58%);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  display: block;
+  margin: 0 auto;
 }
 .book-thumb-fallback {
-  width: 60px; height: 80px; border-radius: 4px;
-  background: var(--border); flex-shrink: 0;
+  width: min(120px, 58%);
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--border) 0%, var(--cream) 100%);
   display: flex; align-items: center; justify-content: center;
-  font-size: 22px; opacity: .4;
+  font-size: 34px;
+  opacity: .55;
+  margin: 0 auto;
+  border: 1px solid var(--border);
 }
-.book-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.book-title { font-family: var(--serif); font-size: 14px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.book-info { width: 100%; min-width: 0; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.book-title { font-family: var(--serif); font-size: 14px; font-weight: 700; margin-bottom: 3px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .book-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .book-point { font-size: 12px; color: var(--ink); line-height: 1.7; margin-bottom: 8px; }
 .book-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
@@ -507,6 +518,36 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .img-preview-thumb {
   width: 60px; height: 80px; object-fit: cover;
   border-radius: 4px; border: 1px solid var(--border); margin-top: 8px;
+}
+
+.furubon-thumb {
+  width: min(120px, 58%);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+}
+
+.furubon-thumb-fallback {
+  width: min(120px, 58%);
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  margin: 0 auto 10px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--border) 0%, var(--cream) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  opacity: .55;
+}
+
+.furubon-title {
+  text-align: center;
 }
 
 /* ─── poyo ─── */
@@ -1294,7 +1335,6 @@ async function buildAllBooksGrid(filterStoreId) {
         <div style="margin-bottom:5px;"><span class="news-badge news-badge--${b.storeId}" style="cursor:default;min-width:0;display:inline-block;">${store ? store.name : b.storeId}</span></div>
         <div style="font-family:var(--serif);font-size:13px;font-weight:700;margin-bottom:2px;">${b.title}</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${[b.author, b.publisher].filter(Boolean).join(' ／ ')}</div>
-        ${b.point ? `<div style="font-size:12px;color:var(--ink);line-height:1.6;">${b.point}</div>` : ''}
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">${b.poster ? 'by ' + b.poster : ''}</div>
       </div>
     </div>`;
@@ -1444,7 +1484,9 @@ async function buildFurubonGrid() {
     const chatCount = getChats(item.id).length;
     card.innerHTML = `
       <div class="furubon-tags"><span class="${tagClass}">${tagLabel}</span></div>
-      ${item.image ? `<img src="${item.image}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:10px;border:1px solid var(--border);">` : ''}
+      ${item.image
+        ? `<img class="furubon-thumb" src="${item.image}" alt="">`
+        : `<div class="furubon-thumb-fallback" aria-hidden="true">📖</div>`}
       <div class="furubon-title">${item.title}</div>
       <div class="furubon-author">${item.author || ''}</div>
       ${item.comment ? `<div class="furubon-comment">${item.comment}</div>` : ''}
