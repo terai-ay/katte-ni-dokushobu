@@ -195,6 +195,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
   background: var(--accent-light); color: var(--accent);
   margin-top: 1px; flex-shrink: 0;
   min-width: 116px; text-align: center;
+  cursor: pointer;
 }
 .news-badge--book-book { background: #EDE8DF; color: #5C4A32; }
 .news-badge--inspire   { background: #DDE4E8; color: #2E4D5C; }
@@ -972,7 +973,7 @@ async function buildNewsList() {
   el.innerHTML = books.map(b => {
     const store = STORES.find(s => s.id === b.storeId);
     return `<div class="news-item">
-      <span class="news-badge news-badge--${b.storeId}">${store ? store.name : b.storeId}</span>
+      <span class="news-badge news-badge--${b.storeId}" onclick="openStore('${b.storeId}')">${store ? store.name : b.storeId}</span>
       <div>
         <div class="news-text">${b.poster ? b.poster+'さん' : '匿名'}が「${b.title}」をおすすめしました</div>
         <div class="news-time">${formatDate(b.createdAt)}</div>
@@ -992,7 +993,7 @@ async function buildNewsListFull() {
   el.innerHTML = books.map(b => {
     const store = STORES.find(s => s.id === b.storeId);
     return `<div class="news-item">
-      <span class="news-badge news-badge--${b.storeId}">${store ? store.name : b.storeId}</span>
+      <span class="news-badge news-badge--${b.storeId}" onclick="openStore('${b.storeId}')">${store ? store.name : b.storeId}</span>
       <div>
         <div class="news-text">${b.poster ? b.poster+'さん' : '匿名'}が「${b.title}」（${b.author||'著者不明'}）をおすすめしました</div>
         <div class="news-time">${formatDate(b.createdAt)}</div>
