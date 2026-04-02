@@ -1028,7 +1028,6 @@ async function submitBook(mode) {
   const prevEl = document.getElementById(prefix+'image-preview');
   if (prevEl) prevEl.style.display = 'none';
   showToast('📚 投稿しました！');
-  notifyTeams(title, storeId, prefix);
   if (mode === 'detail') await buildBookGrid(storeId);
   await buildStoreGrid();
   await buildNewsList();
@@ -1441,7 +1440,6 @@ function previewImage(inputId, previewId) {
   };
   reader.readAsDataURL(file);
 }
-  // ─── Teams通知 ─────────────────────────────────────── const TEAMS_WEBHOOK = 'https://default009aa7ef051f44f4ac13767279df91.9b.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6be0675f863d4ff6a389a501c33e4b74/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=5d5Ux6ajOUfSHPSX6JeFvqZdpWn40P8H6aBgUkvje5g'; async function notifyTeams(title, storeId, prefix) { const store = STORES.find(s => s.id === storeId); const storeName = store ? store.icon + ' ' + store.name : storeId; const author = document.getElementById(prefix+'author')?.value.trim(); const poster = document.getElementById(prefix+'name')?.value.trim(); const point = document.getElementById(prefix+'point')?.value.trim(); const body = [ `📚 **${storeName}** に新しい本が入荷しました！`, `「${title}」${author ? '/ ' + author : ''}`, poster ? `by ${poster}` : '', point ? `> ${point}` : '', ].filter(Boolean).join('\n'); try { await fetch(TEAMS_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: body }), }); } catch (e) { console.warn('Teams通知失敗:', e); } }
 </script>
 <!-- 古本屋チャット モーダル -->
 <div class="modal-overlay" id="chatModal" onclick="closeChatModal(event)">
