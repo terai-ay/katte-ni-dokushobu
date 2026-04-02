@@ -395,6 +395,13 @@ nav button.active { color: var(--accent); font-weight: 500; }
   header { padding: 0 16px; }
   .hero-caption { padding: 16px 20px 24px; }
   .section { padding: 32px 16px; margin-bottom: 27px; }
+  .furubon-grid.collapsed {
+    max-height: none;
+    overflow: visible;
+  }
+  .furubon-grid.has-toggle .furubon-grid-toggle-btn {
+    display: none;
+  }
 }
 @media (max-width: 480px) {
   .store-grid { grid-template-columns: 1fr; }
@@ -576,15 +583,26 @@ nav button.active { color: var(--accent); font-weight: 500; }
   display: flex; align-items: center; justify-content: center; font-size: 20px;
 }
 .chat-messages { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; min-height: 80px; }
-.chat-msg-item { display: flex; flex-direction: column; gap: 2px; }
+.chat-msg-item { display: flex; flex-direction: column; gap: 3px; }
 .chat-msg-item.self { align-items: flex-end; }
 .chat-msg-name { font-size: 11px; color: var(--muted); }
 .chat-msg-item.self .chat-msg-name { text-align: right; }
+.chat-msg-body {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 90%;
+  padding-bottom: 16px;
+}
+.chat-msg-item.self .chat-msg-body {
+  align-items: flex-end;
+}
 .chat-msg-bubble {
   background: var(--card-bg); border: 1px solid var(--border);
   border-radius: 0 8px 8px 8px; padding: 8px 12px;
   font-size: 13px; line-height: 1.7; color: var(--ink);
-  max-width: 90%; align-self: flex-start;
+  max-width: 100%; align-self: flex-start;
 }
 .chat-msg-item.self .chat-msg-bubble {
   align-self: flex-end;
@@ -593,6 +611,31 @@ nav button.active { color: var(--accent); font-weight: 500; }
 }
 .chat-msg-time { font-size: 10px; color: var(--muted); }
 .chat-msg-item.self .chat-msg-time { text-align: right; }
+.chat-reaction-picker {
+  position: absolute; top: 8px; right: 8px; display: flex; gap: 6px;
+  opacity: 0; transform: translateY(-4px); pointer-events: none; transition: all .18s ease;
+}
+.chat-msg-body:hover .chat-reaction-picker {
+  opacity: 1; transform: translateY(0); pointer-events: auto;
+}
+.chat-reaction-picker .reaction-btn::after {
+  display: none;
+}
+.chat-reaction-summary {
+  position: absolute; left: 8px; bottom: -7px;
+  display: inline-flex; gap: 5px; align-items: center; flex-wrap: wrap;
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: 999px;
+  padding: 2px 7px; z-index: 2; box-shadow: 0 3px 8px rgba(28,26,23,.08);
+}
+.chat-reaction-summary .reaction-chip {
+  font-size: 12px;
+}
+.chat-reaction-summary .reaction-count {
+  font-size: 10px;
+}
+.chat-msg-item .chat-msg-time {
+  margin-top: 7px;
+}
 .chat-input-row { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 14px; flex-shrink: 0; }
 .chat-name-input { width: 100px; flex-shrink: 0; }
 .chat-msg-input { flex: 1; }
@@ -1108,6 +1151,14 @@ const REACTION_TYPES = [
   { key: 'bibibi', icon: '⚡', label: 'ビビビッ', field: 'reactionBibibi' },
 ];
 
+const CHAT_REACTION_TYPES = [
+  { key: 'like', icon: '👍' },
+  { key: 'love', icon: '❤️' },
+  { key: 'laugh', icon: '😂' },
+  { key: 'heartEyes', icon: '😍' },
+  { key: 'cry', icon: '😭' },
+];
+
 const HERO_SLIDES = [
   { img:'images/hero1.jpg', title:'本は、もうひとつの世界への扉', sub:'読書部メンバーが選んだ一冊と出会おう', target:'section-store-list' },
   { img:'images/hero2.jpg', title:'あなたの本が、誰かの人生を変えるかも', sub:'古本市で探してみよう', target:'section-furubon' },
@@ -1202,6 +1253,68 @@ async function updateLikes(id, likes) {
 // liked はブラウザに残す（個人の操作記録なのでOK）
 function getLiked() { return JSON.parse(localStorage.getItem('book-liked') || '[]'); }
 function saveLiked(d) { localStorage.setItem('book-liked', JSON.stringify(d)); }
+
+function getEmptyChatReactionCounts() {
+  return CHAT_REACTION_TYPES.reduce((acc, reaction) => {
+    acc[reaction.key] = 0;
+    return acc;
+  }, {});
+}
+
+async function getChatReactionMapByChats(chats) {
+  const chatIds = chats.map(chat => Number(chat.id)).filter(Number.isFinite);
+  const map = {};
+  chats.forEach(chat => {
+    map[String(chat.id)] = getEmptyChatReactionCounts();
+  });
+
+  if (!chatIds.length) return map;
+
+  const idList = chatIds.join(',');
+  const data = await sbFetch('furubon_chat_reactions?chat_id=in.(' + idList + ')&select=chat_id,reaction_key,count');
+  if (!Array.isArray(data)) return map;
+
+  data.forEach(row => {
+    const chatId = String(row.chat_id);
+    const reactionKey = String(row.reaction_key || '');
+    if (!map[chatId]) map[chatId] = getEmptyChatReactionCounts();
+    if (!CHAT_REACTION_TYPES.some(reaction => reaction.key === reactionKey)) return;
+    map[chatId][reactionKey] = Number(row.count || 0);
+  });
+  return map;
+}
+
+async function increaseChatReaction(chatId, reactionKey) {
+  const key = String(reactionKey || '');
+  const id = Number(chatId);
+  if (!Number.isFinite(id)) return false;
+
+  const existing = await sbFetch(
+    'furubon_chat_reactions?chat_id=eq.' + id + '&reaction_key=eq.' + encodeURIComponent(key) + '&select=id,count&limit=1'
+  );
+  if (existing === null) return false;
+
+  if (Array.isArray(existing) && existing.length > 0) {
+    const row = existing[0];
+    const updated = await sbFetch('furubon_chat_reactions?id=eq.' + row.id + '&select=id', {
+      method: 'PATCH',
+      headers: { ...SUPA_HEADERS, 'Prefer': 'return=representation' },
+      body: JSON.stringify({ count: Number(row.count || 0) + 1 }),
+    });
+    return Array.isArray(updated);
+  }
+
+  const inserted = await sbFetch('furubon_chat_reactions?select=id', {
+    method: 'POST',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=representation' },
+    body: JSON.stringify({
+      chat_id: id,
+      reaction_key: key,
+      count: 1,
+    }),
+  });
+  return Array.isArray(inserted);
+}
 
 // 古本屋チャットはSupabase版（永続化対応）
 async function getChats(bookId) {
@@ -1848,6 +1961,7 @@ async function openChatModal(id) {
 
 async function renderChats(bookId) {
   const chats = await getChats(bookId);
+  const reactionMap = await getChatReactionMapByChats(chats);
   const el = document.getElementById('chatMessages');
   const myName = (document.getElementById('chatName')?.value || '').trim() || '匿名';
   if (!chats.length) {
@@ -1857,10 +1971,55 @@ async function renderChats(bookId) {
   el.innerHTML = chats.map(c => `
     <div class="chat-msg-item ${(c.name || '匿名') === myName ? 'self' : ''}">
       <div class="chat-msg-name">${c.name || '匿名'}</div>
-      <div class="chat-msg-bubble">${c.text}</div>
+      <div class="chat-msg-body">
+        <div class="chat-msg-bubble">${c.text}</div>
+        ${renderChatReactionPicker(bookId, c.id)}
+        ${renderChatReactionSummary(reactionMap[String(c.id)] || getEmptyChatReactionCounts())}
+      </div>
       <div class="chat-msg-time">${formatDate(c.createdAt)}</div>
     </div>`).join('');
   el.scrollTop = el.scrollHeight;
+}
+
+function renderChatReactionPicker(bookId, chatId) {
+  return `
+    <div class="chat-reaction-picker">
+      ${CHAT_REACTION_TYPES.map(reaction => `
+        <button class="reaction-btn" type="button"
+          onclick="handleChatReaction('${bookId}','${chatId}','${reaction.key}', this)">
+          <span class="reaction-icon">${reaction.icon}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderChatReactionSummary(counts) {
+  const active = CHAT_REACTION_TYPES.filter(reaction => Number(counts[reaction.key] || 0) > 0);
+  if (!active.length) return '';
+  return `
+    <div class="chat-reaction-summary">
+      ${active.map(reaction => {
+        const count = Number(counts[reaction.key] || 0);
+        return `<span class="reaction-chip">${reaction.icon}${count >= 2 ? ` <span class="reaction-count">${count}</span>` : ''}</span>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+async function handleChatReaction(bookId, chatId, reactionKey, buttonEl) {
+  if (!CHAT_REACTION_TYPES.some(reaction => reaction.key === reactionKey)) return;
+  const saved = await increaseChatReaction(chatId, reactionKey);
+  if (!saved) {
+    showToast('リアクション保存に失敗しました');
+    return;
+  }
+  if (buttonEl) {
+    buttonEl.classList.remove('pop');
+    void buttonEl.offsetWidth;
+    buttonEl.classList.add('pop');
+  }
+  await renderChats(bookId);
 }
 
 async function sendChat() {
