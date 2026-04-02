@@ -370,14 +370,22 @@ nav button.active { color: var(--accent); font-weight: 500; }
 }
 .chat-messages { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; min-height: 80px; }
 .chat-msg-item { display: flex; flex-direction: column; gap: 2px; }
+.chat-msg-item.self { align-items: flex-end; }
 .chat-msg-name { font-size: 11px; color: var(--muted); }
+.chat-msg-item.self .chat-msg-name { text-align: right; }
 .chat-msg-bubble {
   background: var(--card-bg); border: 1px solid var(--border);
   border-radius: 0 8px 8px 8px; padding: 8px 12px;
   font-size: 13px; line-height: 1.7; color: var(--ink);
   max-width: 90%; align-self: flex-start;
 }
+.chat-msg-item.self .chat-msg-bubble {
+  align-self: flex-end;
+  border-radius: 8px 0 8px 8px;
+  background: #f4ece1;
+}
 .chat-msg-time { font-size: 10px; color: var(--muted); }
+.chat-msg-item.self .chat-msg-time { text-align: right; }
 .chat-input-row { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 14px; flex-shrink: 0; }
 .chat-name-input { width: 100px; flex-shrink: 0; }
 .chat-msg-input { flex: 1; }
@@ -1240,6 +1248,10 @@ async function openChatModal(id) {
       <span class="${tagClass}" style="font-size:11px;padding:3px 9px;border-radius:4px;font-weight:500;display:inline-block;margin-bottom:6px;">${tagLabel}</span>
       ${item.comment ? `<div style="font-size:13px;color:var(--ink);line-height:1.7;">${item.comment}</div>` : ''}
     </div>`;
+  const chatNameInput = document.getElementById('chatName');
+  chatNameInput.oninput = () => {
+    if (currentChatId) renderChats(currentChatId);
+  };
   await renderChats(id);
   document.getElementById('chatModal').classList.add('open');
 }
@@ -1247,12 +1259,13 @@ async function openChatModal(id) {
 async function renderChats(bookId) {
   const chats = await getChats(bookId);
   const el = document.getElementById('chatMessages');
+  const myName = (document.getElementById('chatName')?.value || '').trim() || '匿名';
   if (!chats.length) {
     el.innerHTML = '<div class="chat-empty">まだコメントがありません。最初のメッセージを送ってみよう！</div>';
     return;
   }
   el.innerHTML = chats.map(c => `
-    <div class="chat-msg-item">
+    <div class="chat-msg-item ${(c.name || '匿名') === myName ? 'self' : ''}">
       <div class="chat-msg-name">${c.name || '匿名'}</div>
       <div class="chat-msg-bubble">${c.text}</div>
       <div class="chat-msg-time">${formatDate(c.createdAt)}</div>
