@@ -600,7 +600,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
         </div>
       </div>
       <button class="form-submit" onclick="submitBook('detail')">この書店に投稿する</button>
-      <p class="form-note">※ 投稿はみんなで共有されます</p>
+      <p class="form-note">※ 投稿はみんなに共有されます</p>
     </div>
   </div>
 </div>
@@ -1039,7 +1039,6 @@ async function buildBookGrid(storeId) {
         </div>
         ${b.password ? `
         <div class="delete-row">
-          <input type="password" class="delete-pw-input" id="delpw-${b.id}" placeholder="削除用PW">
           <button class="btn-delete-confirm" onclick="deleteBook('${b.id}','${storeId}')">削除</button>
         </div>` : ''}
       </div>
@@ -1101,9 +1100,10 @@ function showPage(name) {
   const navBtn = document.getElementById('nav-'+(name==='store'?'top':name));
   if (navBtn) navBtn.classList.add('active');
 
-  // 「勝手に本の市」「みんなの読みたいリスト」は投稿ページ表示時は隠す
+  // 「勝手に本の市」「みんなの読みたいリスト」は投稿ページと書店ページ表示時は隠す
   const common = document.getElementById('commonSections');
-  if (common) common.style.display = (name === 'post' ? 'none' : 'block');
+  if (common) common.style.display = (name === 'post' || name === 'store' ? 'none' : 'block');
+  
 
   if (name === 'news') buildNewsListFull();
   window.scrollTo(0, 0);
@@ -1385,15 +1385,15 @@ function pickMood(mood, emoji) {
 
 // ─── 削除処理 ────────────────────────────────────────
 async function deleteBook(bookId, storeId) {
-  const input   = document.getElementById('delpw-' + bookId);
-  const entered = input ? input.value : '';
   const books   = await getBooks();
   const book    = books.find(b => b.id === bookId);
   if (!book) return;
-  if (book.password && book.password !== entered) {
-    showToast('パスワードが違います');
-    if (input) { input.style.borderColor = '#B5322A'; setTimeout(() => input.style.borderColor = '', 1500); }
-    return;
+  if (book.password) {
+    const entered = prompt('削除用パスワードを入力してください:');
+    if (!entered || entered !== book.password) {
+      showToast('パスワードが違います');
+      return;
+    }
   }
   await deleteBookById(bookId);
   showToast('🗑️ 削除しました');
