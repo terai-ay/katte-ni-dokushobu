@@ -275,6 +275,9 @@ nav button.active { color: var(--accent); font-weight: 500; }
   border-color: var(--accent); transform: translateY(-1px) scale(1.04);
   background: white;
 }
+.reaction-btn.pop {
+  animation: reactionPop .26s ease-out;
+}
 .reaction-btn::after {
   content: attr(data-label); position: absolute; left: 50%; bottom: calc(100% + 8px);
   transform: translateX(-50%) translateY(4px); background: rgba(28,26,23,.92); color: white;
@@ -350,6 +353,29 @@ nav button.active { color: var(--accent); font-weight: 500; }
 
 /* ─── ANIMATIONS ─── */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes reactionPop {
+  0%   { transform: translateY(0) scale(1); }
+  40%  { transform: translateY(-2px) scale(1.28); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes poyoWalkIn {
+  0%   { transform: translateX(-180px) translateY(0); }
+  18%  { transform: translateX(-146px) translateY(-4px); }
+  36%  { transform: translateX(-112px) translateY(0); }
+  54%  { transform: translateX(-78px) translateY(-3px); }
+  72%  { transform: translateX(-40px) translateY(0); }
+  88%  { transform: translateX(-14px) translateY(-2px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+@keyframes poyoWalkOut {
+  0%   { transform: translateX(0) translateY(0); }
+  16%  { transform: translateX(-22px) translateY(-3px); }
+  34%  { transform: translateX(-54px) translateY(0); }
+  52%  { transform: translateX(-92px) translateY(-3px); }
+  70%  { transform: translateX(-130px) translateY(0); }
+  88%  { transform: translateX(-160px) translateY(-2px); }
+  100% { transform: translateX(-180px) translateY(0); }
+}
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 768px) {
@@ -487,7 +513,15 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .poyo-wrap {
   position: fixed; bottom: 24px; left: 36px; z-index: 150;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
+  transform: translateX(-180px);
+  opacity: 0;
+  pointer-events: none;
 }
+.poyo-wrap.is-visible { transform: translateX(0); opacity: 1; pointer-events: auto; }
+.poyo-wrap.is-entering,
+.poyo-wrap.is-leaving { opacity: 1; }
+.poyo-wrap.is-entering { animation: poyoWalkIn 1.15s ease-out forwards; pointer-events: auto; }
+.poyo-wrap.is-leaving { animation: poyoWalkOut 1s ease-in forwards; pointer-events: none; }
 .poyo-balloon-wrap {
   background: var(--card-bg); border: 1px solid var(--border);
   border-radius: 12px 12px 0 12px; padding: 10px 14px;
@@ -500,6 +534,10 @@ nav button.active { color: var(--accent); font-weight: 500; }
   transition: transform .2s; filter: drop-shadow(0 4px 8px rgba(28,26,23,.15));
 }
 .poyo-img:hover { transform: scale(1.08); }
+.poyo-wrap.is-leaving .poyo-img,
+.poyo-wrap.is-leaving .poyo-img-fallback {
+  transform: scaleX(-1) !important;
+}
 .poyo-img-fallback {
   width: 88px; height: 88px; border-radius: 50%;
   background: var(--accent-light); border: 2px solid var(--accent);
@@ -507,6 +545,26 @@ nav button.active { color: var(--accent); font-weight: 500; }
   font-size: 28px; cursor: pointer; transition: transform .2s;
 }
 .poyo-img-fallback:hover { transform: scale(1.08); }
+
+.poyo-call-btn {
+  position: fixed; bottom: 28px; left: 20px; z-index: 170;
+  width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, #fffdf9 0%, #efe4d6 100%);
+  color: var(--dark); border: 1px solid rgba(181, 144, 103, .28);
+  border-radius: 50%; font-family: var(--sans); font-size: 22px; cursor: pointer;
+  box-shadow: 0 10px 22px rgba(28,26,23,.12); transition: all .2s;
+  backdrop-filter: blur(8px);
+}
+.poyo-call-btn:hover { transform: translateY(-2px) scale(1.03); }
+.poyo-call-btn::after {
+  content: attr(data-label); position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
+  background: rgba(28,26,23,.92); color: white; border-radius: 999px;
+  padding: 7px 11px; font-size: 12px; line-height: 1; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: all .18s ease;
+}
+.poyo-call-btn:hover::after {
+  opacity: 1;
+}
 
 /* ─── poyoモーダル ─── */
 .poyo-modal-balloon {
@@ -1249,7 +1307,7 @@ function renderReactionPicker(book, context) {
       ${REACTION_TYPES.map(reaction => `
         <button class="reaction-btn" type="button"
           data-label="${reaction.label}"
-          onclick="handleReactionClick('${book.id}','${reaction.key}',${Number(book[reaction.field] || 0)},'${context}','${book.storeId}')">
+          onclick="handleReactionClick('${book.id}','${reaction.key}',${Number(book[reaction.field] || 0)},'${context}','${book.storeId}', this)">
           <span class="reaction-icon">${reaction.icon}</span>
         </button>`).join('')}
     </div>`;
@@ -1267,7 +1325,7 @@ function renderReactionSummary(book) {
     </div>`;
 }
 
-async function handleReactionClick(bookId, reactionKey, currentCount, context, storeId) {
+async function handleReactionClick(bookId, reactionKey, currentCount, context, storeId, buttonEl) {
   const columnMap = {
     read: 'reaction_read',
     curious: 'reaction_curious',
@@ -1280,6 +1338,13 @@ async function handleReactionClick(bookId, reactionKey, currentCount, context, s
   };
   const column = columnMap[reactionKey];
   if (!column) return;
+
+  if (buttonEl) {
+    buttonEl.classList.remove('pop');
+    void buttonEl.offsetWidth;
+    buttonEl.classList.add('pop');
+  }
+
   await updateBookReaction(bookId, column, Number(currentCount || 0) + 1);
   showToast(labelMap[reactionKey] + ' を追加しました');
   if (context === 'detail') {
@@ -1592,11 +1657,40 @@ const MOOD_MAP = {
 
 function startPoyo() {
   const el = document.getElementById('poyoBalloon');
+  if (!el) return;
   function rotate() {
     el.textContent = POYO_LINES[Math.floor(Math.random() * POYO_LINES.length)];
   }
   rotate();
   setInterval(rotate, 6000);
+}
+
+function togglePoyoPresence() {
+  const wrap = document.getElementById('poyoWrap');
+  const btn = document.getElementById('poyoCallBtn');
+  if (!wrap || !btn) return;
+  if (wrap.classList.contains('is-leaving')) return;
+
+  const isShown = wrap.classList.contains('is-visible') || wrap.classList.contains('is-entering');
+  if (!isShown) {
+    wrap.classList.remove('is-leaving');
+    wrap.classList.add('is-entering');
+    btn.textContent = '🐾';
+    btn.dataset.label = 'Bye👋Poyo';
+    setTimeout(() => {
+      wrap.classList.remove('is-entering');
+      wrap.classList.add('is-visible');
+    }, 1150);
+    return;
+  }
+
+  wrap.classList.remove('is-visible', 'is-entering');
+  wrap.classList.add('is-leaving');
+  btn.textContent = '🔔';
+  btn.dataset.label = 'Hey👐Poyo';
+  setTimeout(() => {
+    wrap.classList.remove('is-leaving');
+  }, 1000);
 }
 
 function openPoyoModal() {
@@ -1971,6 +2065,7 @@ function previewImage(inputId, previewId) {
     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
   <div class="poyo-img-fallback" style="display:none" onclick="openPoyoModal()">🐾</div>
 </div>
+<button class="poyo-call-btn" id="poyoCallBtn" data-label="Hey👐Poyo" onclick="togglePoyoPresence()">🔔</button>
 
 
 </body>
