@@ -445,6 +445,7 @@
       flex-shrink: 0;
       min-width: 116px;
       text-align: center;
+      cursor: pointer;
     }
 
     .news-badge--book-book {
@@ -2027,7 +2028,7 @@
       el.innerHTML = books.map(b => {
         const store = STORES.find(s => s.id === b.storeId);
         return `<div class="news-item">
-      <span class="news-badge news-badge--${b.storeId}">${store ? store.name : b.storeId}</span>
+      <span class="news-badge news-badge--${b.storeId}" onclick="openStore('${b.storeId}')">${store ? store.name : b.storeId}</span>
       <div>
         <div class="news-text">${b.poster ? b.poster + 'さん' : '匿名'}が「${b.title}」をおすすめしました</div>
         <div class="news-time">${formatDate(b.createdAt)}</div>
@@ -2047,7 +2048,7 @@
       el.innerHTML = books.map(b => {
         const store = STORES.find(s => s.id === b.storeId);
         return `<div class="news-item">
-      <span class="news-badge news-badge--${b.storeId}">${store ? store.name : b.storeId}</span>
+      <span class="news-badge news-badge--${b.storeId}" onclick="openStore('${b.storeId}')">${store ? store.name : b.storeId}</span>
       <div>
         <div class="news-text">${b.poster ? b.poster + 'さん' : '匿名'}が「${b.title}」（${b.author || '著者不明'}）をおすすめしました</div>
         <div class="news-time">${formatDate(b.createdAt)}</div>
