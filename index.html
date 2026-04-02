@@ -165,8 +165,14 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .store-card-body { padding: 16px; }
 .store-card-name {
   font-family: var(--serif); font-size: 15px; font-weight: 700;
-  margin-bottom: 6px; color: #2D6A4F;
+  margin-bottom: 6px; color: var(--ink);
 }
+.store-card-name--nt-book  { color: #5C4A32; }
+.store-card-name--inspire  { color: #2E4D5C; }
+.store-card-name--comimate { color: #5C2E4A; }
+.store-card-name--bungaku  { color: #3D2E5C; }
+.store-card-name--hoshi    { color: #2E3A5C; }
+.store-card-name--yami     { color: #3A3A38; }
 .store-card-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.7; }
 .store-card-count { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
 .btn-enter {
@@ -189,6 +195,12 @@ nav button.active { color: var(--accent); font-weight: 500; }
   background: var(--accent-light); color: var(--accent);
   margin-top: 1px; flex-shrink: 0;
 }
+.news-badge--nt-book   { background: #EDE8DF; color: #5C4A32; }
+.news-badge--inspire   { background: #DDE4E8; color: #2E4D5C; }
+.news-badge--comimate  { background: #E8DDE4; color: #5C2E4A; }
+.news-badge--bungaku   { background: #E2DDE8; color: #3D2E5C; }
+.news-badge--hoshi     { background: #DDE1E8; color: #2E3A5C; }
+.news-badge--yami      { background: #E0E0DF; color: #3A3A38; }
 .news-text { font-size: 13px; line-height: 1.6; color: var(--ink); }
 .news-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .news-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 13px; }
@@ -931,7 +943,7 @@ async function buildStoreGrid() {
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="store-card-img-fallback" style="display:none"><span>${s.icon}</span></div>
       <div class="store-card-body">
-        <div class="store-card-name">${s.name}</div>
+        <div class="store-card-name store-card-name--${s.id}">${s.name}</div>
         <div class="store-card-desc">${s.desc}</div>
         <div class="store-card-count">本棚：${count}冊</div>
         <div class="btn-enter">書店をのぞく</div>
@@ -951,7 +963,7 @@ async function buildNewsList() {
   el.innerHTML = books.map(b => {
     const store = STORES.find(s => s.id === b.storeId);
     return `<div class="news-item">
-      <span class="news-badge">${store ? store.name : b.storeId}</span>
+      <span class="news-badge news-badge--${b.storeId}">${store ? store.name : b.storeId}</span>
       <div>
         <div class="news-text">${b.poster ? b.poster+'さん' : '匿名'}が「${b.title}」をおすすめしました</div>
         <div class="news-time">${formatDate(b.createdAt)}</div>
@@ -971,7 +983,7 @@ async function buildNewsListFull() {
   el.innerHTML = books.map(b => {
     const store = STORES.find(s => s.id === b.storeId);
     return `<div class="news-item">
-      <span class="news-badge">${store ? store.name : b.storeId}</span>
+      <span class="news-badge news-badge--${b.storeId}">${store ? store.name : b.storeId}</span>
       <div>
         <div class="news-text">${b.poster ? b.poster+'さん' : '匿名'}が「${b.title}」（${b.author||'著者不明'}）をおすすめしました</div>
         <div class="news-time">${formatDate(b.createdAt)}</div>
