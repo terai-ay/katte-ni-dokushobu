@@ -1074,6 +1074,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
         <div class="form-group full">
           <label>取引完了用パスワード（任意）</label>
           <input type="password" id="fb-pw" placeholder="設定しておくと取引完了時に確認できます">
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;">取引完了にすると、この出品カードは本の市の一覧から表示されなくなります。</div>
         </div>
         <div class="form-group full">
         <label>画像（任意・1.5MB以下）</label>
@@ -2254,6 +2255,10 @@ function openProtectedActionModal({ title, description, buttonLabel, actionType,
   pendingProtectedAction = { actionType, targetId, storeId };
   document.getElementById('deleteModalTitle').textContent = title;
   document.getElementById('deleteModalDesc').textContent = description;
+  document.getElementById('deleteModalNote').textContent = actionType === 'furubon-done'
+    ? '取引完了にすると、この出品カードは本の市の一覧から表示されなくなります。'
+    : '';
+  document.getElementById('deleteModalNote').style.display = actionType === 'furubon-done' ? 'block' : 'none';
   document.getElementById('deleteConfirmBtn').textContent = buttonLabel;
   document.getElementById('deleteModal').classList.add('open');
   document.getElementById('deletePwInput').value = '';
@@ -2452,6 +2457,7 @@ function previewImage(inputId, previewId) {
         <label style="font-size:12px;color:var(--muted);font-weight:500;">削除用パスワード</label>
         <input type="password" id="deletePwInput" placeholder="パスワードを入力"
           style="width:100%;font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 12px;outline:none;margin-top:6px;">
+        <div id="deleteModalNote" style="display:none;font-size:12px;color:var(--muted);line-height:1.7;margin-top:8px;"></div>
       </div>
     </div>
     <div style="padding:0 20px 16px;display:flex;gap:10px;justify-content:flex-end;">
