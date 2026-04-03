@@ -395,13 +395,6 @@ nav button.active { color: var(--accent); font-weight: 500; }
   header { padding: 0 16px; }
   .hero-caption { padding: 16px 20px 24px; }
   .section { padding: 32px 16px; margin-bottom: 27px; }
-  .furubon-grid.collapsed {
-    max-height: none;
-    overflow: visible;
-  }
-  .furubon-grid.has-toggle .furubon-grid-toggle-btn {
-    display: none;
-  }
 }
 @media (max-width: 480px) {
   .store-grid { grid-template-columns: 1fr; }
@@ -426,36 +419,83 @@ nav button.active { color: var(--accent); font-weight: 500; }
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
-  transition: max-height .3s ease;
 }
-
-.furubon-grid.collapsed {
-  max-height: calc((240px + 16px) * 2 + 240px);
-  overflow: hidden;
-}
-
-.furubon-grid-toggle-btn {
-  grid-column: 1 / -1;
-  background: none;
+.furubon-card {
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  font-family: var(--sans);
-  font-size: 13px;
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+  animation: fadeIn .4s ease;
+  display: flex;
+  flex-direction: column;
+}
+.furubon-tags { display: flex; gap: 6px; margin-bottom: 10px; }
+.tag-give {
+  background: #FAEEDA;
+  color: #633806;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.tag-lend {
+  background: #E1F5EE;
+  color: #085041;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.furubon-title {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.furubon-author { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.furubon-comment { font-size: 12px; color: var(--ink); line-height: 1.7; margin-bottom: 10px; }
+.furubon-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+.furubon-by { font-size: 11px; color: var(--muted); }
+.furubon-done {
+  font-size: 11px;
   color: var(--accent);
+  border: 1px solid var(--accent-light);
+  background: none;
+  border-radius: 4px;
+  padding: 3px 10px;
   cursor: pointer;
+  font-family: var(--sans);
   transition: all .2s;
+}
+.furubon-done:hover { background: var(--accent); color: white; }
+.furubon-add-card {
+  background: var(--card-bg);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  min-height: 160px;
+  transition: border-color .2s;
+}
+.furubon-add-card:hover { border-color: var(--accent); }
+.furubon-add-icon { font-size: 28px; color: var(--border); }
+.furubon-add-label { font-size: 13px; color: var(--muted); }
+.furubon-form {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-top: 16px;
   display: none;
 }
-
-.furubon-grid.has-toggle .furubon-grid-toggle-btn {
-  display: block;
-}
-
-.furubon-grid-toggle-btn:hover {
-  background: var(--cream);
-  border-color: var(--accent);
-} .furubon-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; animation: fadeIn .4s ease; display: flex; flex-direction: column; } .furubon-tags { display: flex; gap: 6px; margin-bottom: 10px; } .tag-give { background: #FAEEDA; color: #633806; font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 500; } .tag-lend { background: #E1F5EE; color: #085041; font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 500; } .furubon-title { font-family: var(--serif); font-size: 14px; font-weight: 700; margin-bottom: 3px; } .furubon-author { font-size: 12px; color: var(--muted); margin-bottom: 8px; } .furubon-comment { font-size: 12px; color: var(--ink); line-height: 1.7; margin-bottom: 10px; } .furubon-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; } .furubon-by { font-size: 11px; color: var(--muted); } .furubon-done { font-size: 11px; color: var(--accent); border: 1px solid var(--accent-light); background: none; border-radius: 4px; padding: 3px 10px; cursor: pointer; font-family: var(--sans); transition: all .2s; } .furubon-done:hover { background: var(--accent); color: white; } .furubon-add-card { background: var(--card-bg); border: 1px dashed var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; min-height: 160px; transition: border-color .2s; } .furubon-add-card:hover { border-color: var(--accent); } .furubon-add-icon { font-size: 28px; color: var(--border); } .furubon-add-label { font-size: 13px; color: var(--muted); } .furubon-form { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-top: 16px; display: none; } .furubon-form.open { display: block; animation: fadeIn .3s ease; } .furubon-form h4 { font-family: var(--serif); font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.furubon-form.open { display: block; animation: fadeIn .3s ease; }
+.furubon-form h4 { font-family: var(--serif); font-size: 15px; font-weight: 700; margin-bottom: 16px; }
 .tag-lend-active { background: #DDE6F5; color: #2E4D7A; }
 .furubon-borrow {
   font-size: 11px; color: #2E4D7A; background: none;
@@ -1073,7 +1113,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
         </div>
         <div class="form-group full">
           <label>取引完了用パスワード（任意）</label>
-          <input type="password" id="fb-pw" placeholder="設定しておくと取引完了時に確認できます">
+          <input type="password" id="fb-pw" placeholder="誤操作防止のため、取引完了時の確認用パスワードを設定できます（任意）">
           <div style="font-size:12px;color:var(--muted);line-height:1.7;">取引完了にすると、この出品カードは本の市の一覧から表示されなくなります。</div>
         </div>
         <div class="form-group full">
@@ -1734,18 +1774,11 @@ async function buildFurubonGrid() {
   const items = await getFurubon();
   const grid = document.getElementById('furubonGrid');
   grid.innerHTML = '';
-  grid.classList.remove('has-toggle', 'collapsed');
   
-  let isExpanded = false;
-  
-  items.forEach((item, idx) => {
+  items.forEach((item) => {
     const card = document.createElement('div');
     card.className = 'furubon-card';
     card.style.cursor = 'pointer';
-    if (items.length >= 4 && idx >= 4) {
-      card.classList.add('furubon-card-hidden');
-      card.style.display = 'none';
-    }
     const { tagClass, tagLabel } = getFurubonTagMeta(item);
     const chatCount = getChats(item.id).length;
     card.innerHTML = `
@@ -1763,32 +1796,6 @@ async function buildFurubonGrid() {
     card.onclick = () => openChatModal(item.id);
     grid.appendChild(card);
   });
-  
-  // 4冊以上ならトグルボタンを追加
-  if (items.length >= 4) {
-    grid.classList.add('has-toggle', 'collapsed');
-    const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'furubon-grid-toggle-btn';
-    toggleBtn.textContent = 'もっと見る ▼';
-    toggleBtn.onclick = (e) => {
-      e.preventDefault();
-      isExpanded = !isExpanded;
-      if (isExpanded) {
-        grid.classList.remove('collapsed');
-        toggleBtn.textContent = '▲';
-        document.querySelectorAll('.furubon-card-hidden').forEach(card => {
-          card.style.display = '';
-        });
-      } else {
-        grid.classList.add('collapsed');
-        toggleBtn.textContent = 'もっと見る ▼';
-        document.querySelectorAll('.furubon-card-hidden').forEach(card => {
-          card.style.display = 'none';
-        });
-      }
-    };
-    grid.appendChild(toggleBtn);
-  }
   
   const addCard = document.createElement('div');
   addCard.className = 'furubon-add-card';
