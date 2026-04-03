@@ -456,6 +456,14 @@ nav button.active { color: var(--accent); font-weight: 500; }
   background: var(--cream);
   border-color: var(--accent);
 } .furubon-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; animation: fadeIn .4s ease; display: flex; flex-direction: column; } .furubon-tags { display: flex; gap: 6px; margin-bottom: 10px; } .tag-give { background: #FAEEDA; color: #633806; font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 500; } .tag-lend { background: #E1F5EE; color: #085041; font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 500; } .furubon-title { font-family: var(--serif); font-size: 14px; font-weight: 700; margin-bottom: 3px; } .furubon-author { font-size: 12px; color: var(--muted); margin-bottom: 8px; } .furubon-comment { font-size: 12px; color: var(--ink); line-height: 1.7; margin-bottom: 10px; } .furubon-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; } .furubon-by { font-size: 11px; color: var(--muted); } .furubon-done { font-size: 11px; color: var(--accent); border: 1px solid var(--accent-light); background: none; border-radius: 4px; padding: 3px 10px; cursor: pointer; font-family: var(--sans); transition: all .2s; } .furubon-done:hover { background: var(--accent); color: white; } .furubon-add-card { background: var(--card-bg); border: 1px dashed var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; min-height: 160px; transition: border-color .2s; } .furubon-add-card:hover { border-color: var(--accent); } .furubon-add-icon { font-size: 28px; color: var(--border); } .furubon-add-label { font-size: 13px; color: var(--muted); } .furubon-form { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-top: 16px; display: none; } .furubon-form.open { display: block; animation: fadeIn .3s ease; } .furubon-form h4 { font-family: var(--serif); font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.tag-lend-active { background: #DDE6F5; color: #2E4D7A; }
+.furubon-borrow {
+  font-size: 11px; color: #2E4D7A; background: none;
+  border: 1px solid #C9D7EE; border-radius: 4px; padding: 3px 10px;
+  cursor: pointer; font-family: var(--sans); transition: all .2s;
+}
+.furubon-borrow:hover,
+.furubon-borrow.active { background: #2E4D7A; border-color: #2E4D7A; color: white; }
 /* ─── 読みたいリスト ─── */ .yomitai-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; } .yomitai-item { display: flex; align-items: center; gap: 12px; padding: 13px 20px; border-bottom: 1px solid var(--border); animation: fadeIn .4s ease; } .yomitai-item:last-child { border-bottom: none; } .yomitai-num { font-size: 12px; color: var(--muted); min-width: 20px; text-align: center; font-family: var(--serif); } .yomitai-info { flex: 1; } .yomitai-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; } .yomitai-author { font-size: 11px; color: var(--muted); } .yomitai-by { font-size: 11px; color: var(--muted); white-space: nowrap; } .yomitai-good-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; font-family: var(--sans); transition: all .2s; white-space: nowrap; } .yomitai-good-btn:hover { border-color: #378ADD; color: #185FA5; } .yomitai-good-btn.liked { border-color: #378ADD; color: #185FA5; background: #E6F1FB; } .yomitai-add-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; } .yomitai-input { font-family: var(--sans); font-size: 13px; color: var(--ink); background: var(--cream); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; outline: none; transition: border-color .2s; } .yomitai-input:focus { border-color: var(--accent); } .yomitai-submit { padding: 9px 18px; background: var(--accent); color: white; border: none; border-radius: 6px; font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .2s; white-space: nowrap; } .yomitai-submit:hover { opacity: .85; } .yomitai-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 13px; }
 
 /* ─── リアクション別ランキング ─── */
@@ -1340,7 +1348,7 @@ async function getFurubon() {
   return (data || []).map(f => ({
     id: String(f.id), type: f.type, title: f.title,
     author: f.author, poster: f.poster, comment: f.comment,
-    image: f.image, password: f.password, done: f.done, createdAt: f.created_at,
+    image: f.image, password: f.password, done: f.done, isBorrowed: !!f.is_borrowed, createdAt: f.created_at,
   }));
 }
 async function addFurubon(item) {
@@ -1350,7 +1358,7 @@ async function addFurubon(item) {
     body: JSON.stringify({
       type: item.type, title: item.title, author: item.author,
       poster: item.poster, comment: item.comment, image: item.image,
-      password: item.password, done: false,
+      password: item.password, done: false, is_borrowed: false,
     }),
   });
 }
@@ -1360,6 +1368,14 @@ async function doneFurubonById(id) {
     headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
     body: JSON.stringify({ done: true }),
   });
+}
+async function updateFurubonBorrowedState(id, isBorrowed) {
+  const updated = await sbFetch('furubon?id=eq.' + id + '&select=id', {
+    method: 'PATCH',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=representation' },
+    body: JSON.stringify({ is_borrowed: isBorrowed }),
+  });
+  return Array.isArray(updated);
 }
 
 
@@ -1729,8 +1745,7 @@ async function buildFurubonGrid() {
       card.classList.add('furubon-card-hidden');
       card.style.display = 'none';
     }
-    const tagClass = item.type === 'give' ? 'tag-give' : 'tag-lend';
-    const tagLabel = item.type === 'give' ? 'あげます' : '貸します';
+    const { tagClass, tagLabel } = getFurubonTagMeta(item);
     const chatCount = getChats(item.id).length;
     card.innerHTML = `
       <div class="furubon-tags"><span class="${tagClass}">${tagLabel}</span></div>
@@ -1779,6 +1794,16 @@ async function buildFurubonGrid() {
   addCard.onclick = () => toggleFurubonForm(true);
   addCard.innerHTML = `<div class="furubon-add-icon">＋</div><div class="furubon-add-label">本を出品する</div>`;
   grid.appendChild(addCard);
+}
+
+function getFurubonTagMeta(item) {
+  if (item.type === 'give') {
+    return { tagClass: 'tag-give', tagLabel: 'あげます' };
+  }
+  if (item.isBorrowed) {
+    return { tagClass: 'tag-lend tag-lend-active', tagLabel: '貸出中' };
+  }
+  return { tagClass: 'tag-lend', tagLabel: '貸します' };
 }
 
 function toggleFurubonForm(open) {
@@ -1876,6 +1901,22 @@ async function doneFurubonFromChat() {
   if (completed) document.getElementById('chatModal').classList.remove('open');
 }
 
+async function toggleBorrowFromChat() {
+  if (!currentChatId) return;
+  const items = await getFurubon();
+  const item = items.find(i => i.id === currentChatId);
+  if (!item || item.type !== 'lend') return;
+  const nextState = !item.isBorrowed;
+  const updated = await updateFurubonBorrowedState(currentChatId, nextState);
+  if (!updated) {
+    showToast('貸出状態の更新に失敗しました');
+    return;
+  }
+  await buildFurubonGrid();
+  await openChatModal(currentChatId);
+  showToast(nextState ? '📘 貸出中にしました' : '📗 貸出可能に戻しました');
+}
+
 
 // ─── 読みたいリスト ──────────────────────────────────
 async function buildYomitaiList() {
@@ -1939,8 +1980,7 @@ async function openChatModal(id) {
   const item = items.find(i => i.id === id);
   if (!item) return;
   currentChatId = id;
-  const tagLabel = item.type === 'give' ? 'あげます' : '貸します';
-  const tagClass = item.type === 'give' ? 'tag-give' : 'tag-lend';
+  const { tagLabel, tagClass } = getFurubonTagMeta(item);
   document.getElementById('chatModalTitle').textContent = item.title;
   document.getElementById('chatModalSub').textContent = `${item.author || ''} ／ 出品：${item.poster || '匿名'}`;
   document.getElementById('chatBookInfo').innerHTML = `
@@ -1951,12 +1991,25 @@ async function openChatModal(id) {
       <span class="${tagClass}" style="font-size:11px;padding:3px 9px;border-radius:4px;font-weight:500;display:inline-block;margin-bottom:6px;">${tagLabel}</span>
       ${item.comment ? `<div style="font-size:13px;color:var(--ink);line-height:1.7;">${item.comment}</div>` : ''}
     </div>`;
+  syncChatBorrowButton(item);
   const chatNameInput = document.getElementById('chatName');
   chatNameInput.oninput = () => {
     if (currentChatId) renderChats(currentChatId);
   };
   await renderChats(id);
   document.getElementById('chatModal').classList.add('open');
+}
+
+function syncChatBorrowButton(item) {
+  const btn = document.getElementById('chatBorrowBtn');
+  if (!btn) return;
+  if (item.type !== 'lend') {
+    btn.style.display = 'none';
+    return;
+  }
+  btn.style.display = 'inline-flex';
+  btn.classList.toggle('active', !!item.isBorrowed);
+  btn.textContent = item.isBorrowed ? '返却済みにする' : '借ります';
 }
 
 async function renderChats(bookId) {
@@ -2376,7 +2429,8 @@ function previewImage(inputId, previewId) {
           onkeydown="if(event.key==='Enter')sendChat()">
         <button class="chat-send" onclick="sendChat()">送信</button>
       </div>
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;">
+        <button class="furubon-borrow" id="chatBorrowBtn" onclick="toggleBorrowFromChat()" style="display:none;">借ります</button>
         <button class="furubon-done" id="chatDoneBtn" onclick="doneFurubonFromChat()">取引完了にする</button>
       </div>
     </div>
