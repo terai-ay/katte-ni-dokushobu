@@ -426,6 +426,26 @@ nav button.active { color: var(--accent); font-weight: 500; }
   88%  { transform: translateX(-160px) translateY(-2px); }
   100% { transform: translateX(-180px) translateY(0); }
 }
+@keyframes masterWalkIn {
+  0%   { transform: translateX(220px) translateY(0); }
+  15%  { transform: translateX(186px) translateY(-3px); }
+  30%  { transform: translateX(152px) translateY(0); }
+  45%  { transform: translateX(118px) translateY(-2px); }
+  60%  { transform: translateX(84px) translateY(0); }
+  75%  { transform: translateX(50px) translateY(-2px); }
+  90%  { transform: translateX(20px) translateY(0); }
+  100% { transform: translateX(0) translateY(0); }
+}
+@keyframes masterWalkOut {
+  0%   { transform: translateX(0) translateY(0); }
+  15%  { transform: translateX(24px) translateY(-2px); }
+  30%  { transform: translateX(56px) translateY(0); }
+  45%  { transform: translateX(90px) translateY(-2px); }
+  60%  { transform: translateX(126px) translateY(0); }
+  75%  { transform: translateX(162px) translateY(-2px); }
+  90%  { transform: translateX(196px) translateY(0); }
+  100% { transform: translateX(220px) translateY(0); }
+}
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 768px) {
@@ -859,6 +879,97 @@ nav button.active { color: var(--accent); font-weight: 500; }
 }
 .poyo-call-btn:hover::after {
   opacity: 1;
+}
+
+/* ─── master ─── */
+.master-wrap {
+  position: fixed; bottom: 24px; right: 36px; z-index: 150;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  transform: translateX(220px);
+  opacity: 0;
+  pointer-events: none;
+}
+.master-wrap.is-visible { transform: translateX(0); opacity: 1; pointer-events: auto; }
+.master-wrap.is-entering,
+.master-wrap.is-leaving { opacity: 1; }
+.master-wrap.is-entering { animation: masterWalkIn 1.8s ease-out forwards; pointer-events: auto; }
+.master-wrap.is-leaving { animation: masterWalkOut 1.5s ease-in forwards; pointer-events: none; }
+.master-balloon-wrap {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px 12px 12px 0; padding: 10px 14px;
+  font-size: 13px; color: var(--ink); min-width: 220px; max-width: 260px; line-height: 1.6;
+  box-shadow: 0 4px 16px rgba(28,26,23,.1);
+  animation: fadeIn .4s ease;
+}
+.master-img {
+  width: 88px; height: 88px; object-fit: contain; cursor: pointer;
+  transition: transform .2s; filter: drop-shadow(0 4px 8px rgba(28,26,23,.15));
+}
+.master-img:hover { transform: scale(1.06); }
+.master-img-fallback {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: #ECE4D8; border: 2px solid #A88658;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; cursor: pointer; transition: transform .2s;
+}
+.master-img-fallback:hover { transform: scale(1.06); }
+
+.master-call-btn {
+  position: fixed; bottom: 28px; right: 20px; z-index: 170;
+  width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, #fffdf9 0%, #efe4d6 100%);
+  color: var(--dark); border: 1px solid rgba(181, 144, 103, .28);
+  border-radius: 50%; font-family: var(--sans); font-size: 22px; cursor: pointer;
+  box-shadow: 0 10px 22px rgba(28,26,23,.12); transition: all .2s;
+  backdrop-filter: blur(8px);
+}
+.master-call-btn:hover { transform: translateY(-2px) scale(1.03); }
+.master-call-btn::after {
+  content: attr(data-label); position: absolute; right: 60px; top: 50%; transform: translateY(-50%);
+  background: rgba(28,26,23,.92); color: white; border-radius: 999px;
+  padding: 7px 11px; font-size: 12px; line-height: 1; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: all .18s ease;
+}
+.master-call-btn:hover::after { opacity: 1; }
+
+.master-board-list {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.master-board-item,
+.master-history-item {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.master-board-meta,
+.master-history-date {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.master-board-text,
+.master-history-text {
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.master-help-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+}
+.master-help-list li {
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.8;
 }
 
 /* ─── poyoモーダル ─── */
@@ -1510,6 +1621,52 @@ async function addBookComment(bookId, name, text) {
   return true;
 }
 
+async function getMasterBoardPosts() {
+  const data = await sbFetch('master_board_posts?select=*&order=created_at.asc');
+  if (data === null) return null;
+  return (data || []).map(row => ({
+    id: String(row.id),
+    name: row.name || '匿名',
+    text: row.text || '',
+    createdAt: row.created_at,
+  }));
+}
+
+async function addMasterBoardPost(name, text) {
+  const result = await sbFetch('master_board_posts', {
+    method: 'POST',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      name: name || '匿名',
+      text,
+    }),
+  });
+  return result !== null;
+}
+
+async function getMasterHistoryItems() {
+  const data = await sbFetch('master_revision_history?select=*&order=created_at.asc');
+  if (data === null) return null;
+  return (data || []).map(row => ({
+    id: String(row.id),
+    date: row.display_date || row.created_at,
+    text: row.text || '',
+    createdAt: row.created_at,
+  }));
+}
+
+async function addMasterHistoryItem(text) {
+  const result = await sbFetch('master_revision_history', {
+    method: 'POST',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      display_date: new Date().toISOString().slice(0, 10),
+      text,
+    }),
+  });
+  return result !== null;
+}
+
 // ─── furubon（古本屋）Supabase版 ─────────────────────
 async function getFurubon() {
   const data = await sbFetch('furubon?select=*&order=created_at.asc&done=eq.false');
@@ -1556,15 +1713,46 @@ let pendingBookPreview = null;
 let editingBookState = null;
 let currentBookCommentId = null;
 let bookCommentsUseLocal = false;
+let masterBoardPosts = [];
+let masterHistoryItems = [];
+const MASTER_LINES = [
+  'おつかれさま。今日も本の話をしよう。',
+  '気になる一冊、見つかったかい？',
+  '静かな時間に読む本は、いいね。',
+  '掲示板にひとこと残していかない？',
+  '改訂履歴も、気まぐれで更新してるよ。',
+];
+const MASTER_HISTORY_PASSWORD = 'dokushobu';
 
 document.addEventListener('DOMContentLoaded', async () => {
   buildHero();
   populateStoreSelect();
   updateDetailFormMode();
   startPoyo();
+  await initMasterData();
+  startMaster();
   await buildFurubonGrid();
   await refreshAll();
 });
+
+async function initMasterData() {
+  const board = await getMasterBoardPosts();
+  if (Array.isArray(board)) {
+    masterBoardPosts = board;
+  }
+
+  const history = await getMasterHistoryItems();
+  if (Array.isArray(history)) {
+    masterHistoryItems = history;
+  }
+
+  if (!masterHistoryItems.length) {
+    masterHistoryItems = [
+      { date: '2026-04-04', text: '投稿フォームにプレビュー機能を追加しました。' },
+      { date: '2026-04-04', text: 'おすすめ本カードからコメントできるようにしました。' },
+    ];
+  }
+}
 
 async function refreshAll() {
   await buildStoreGrid();
@@ -2489,6 +2677,165 @@ function closePoyoModal(e) {
   }
 }
 
+function startMaster() {
+  const el = document.getElementById('masterBalloon');
+  if (!el) return;
+  function rotate() {
+    el.textContent = MASTER_LINES[Math.floor(Math.random() * MASTER_LINES.length)];
+  }
+  rotate();
+  setInterval(rotate, 7200);
+}
+
+function toggleMasterPresence() {
+  const wrap = document.getElementById('masterWrap');
+  const btn = document.getElementById('masterCallBtn');
+  if (!wrap || !btn) return;
+  if (wrap.classList.contains('is-leaving')) return;
+
+  const isShown = wrap.classList.contains('is-visible') || wrap.classList.contains('is-entering');
+  if (!isShown) {
+    wrap.classList.remove('is-leaving');
+    wrap.classList.add('is-entering');
+    btn.textContent = '🚪';
+    btn.dataset.label = 'またね';
+    setTimeout(() => {
+      wrap.classList.remove('is-entering');
+      wrap.classList.add('is-visible');
+    }, 1800);
+    return;
+  }
+
+  wrap.classList.remove('is-visible', 'is-entering');
+  wrap.classList.add('is-leaving');
+  btn.textContent = '☕';
+  btn.dataset.label = 'マスターと話す';
+  setTimeout(() => {
+    wrap.classList.remove('is-leaving');
+  }, 1500);
+}
+
+function openMasterModal() {
+  resetMasterModal();
+  document.getElementById('masterModal').classList.add('open');
+}
+
+function closeMasterModal(e) {
+  if (e && e.target !== document.getElementById('masterModal')) return;
+  document.getElementById('masterModal').classList.remove('open');
+}
+
+function resetMasterModal() {
+  document.getElementById('masterModeSelect').style.display = 'block';
+  document.getElementById('masterBoardView').style.display = 'none';
+  document.getElementById('masterHistoryView').style.display = 'none';
+  document.getElementById('masterHelpView').style.display = 'none';
+  document.getElementById('masterModalTitle').textContent = '喫茶マスター';
+  document.getElementById('masterModalBox').style.maxWidth = '540px';
+}
+
+async function switchMasterMode(mode) {
+  document.getElementById('masterModeSelect').style.display = 'none';
+  document.getElementById('masterBoardView').style.display = 'none';
+  document.getElementById('masterHistoryView').style.display = 'none';
+  document.getElementById('masterHelpView').style.display = 'none';
+
+  if (mode === 'board') {
+    document.getElementById('masterModalTitle').textContent = '掲示板（みんなと話す）';
+    document.getElementById('masterBoardView').style.display = 'block';
+    await renderMasterBoard();
+    return;
+  }
+  if (mode === 'history') {
+    document.getElementById('masterModalTitle').textContent = '気まぐれ改訂履歴';
+    document.getElementById('masterHistoryView').style.display = 'block';
+    await renderMasterHistory();
+    return;
+  }
+  document.getElementById('masterModalTitle').textContent = '本サイトの使い方';
+  document.getElementById('masterHelpView').style.display = 'block';
+}
+
+async function renderMasterBoard() {
+  const list = document.getElementById('masterBoardList');
+  if (!list) return;
+  const remote = await getMasterBoardPosts();
+  if (remote === null) {
+    list.innerHTML = '<div class="chat-empty">掲示板を読み込めませんでした。テーブル設定を確認してください。</div>';
+    return;
+  }
+  masterBoardPosts = remote;
+  if (!masterBoardPosts.length) {
+    list.innerHTML = '<div class="chat-empty">まだ書き込みがありません。最初のひとことをどうぞ。</div>';
+    return;
+  }
+  list.innerHTML = masterBoardPosts.slice().reverse().map(post => `
+    <div class="master-board-item">
+      <div class="master-board-meta">${post.name || '匿名'} ・ ${formatDate(post.createdAt)}</div>
+      <div class="master-board-text">${post.text || ''}</div>
+    </div>
+  `).join('');
+}
+
+async function sendMasterBoardPost() {
+  const nameEl = document.getElementById('masterBoardName');
+  const textEl = document.getElementById('masterBoardInput');
+  if (!textEl) return;
+  const text = textEl.value.trim();
+  if (!text) return;
+
+  const saved = await addMasterBoardPost((nameEl?.value || '').trim(), text);
+  if (!saved) {
+    showToast('掲示板の保存に失敗しました（Supabase設定を確認）');
+    return;
+  }
+  textEl.value = '';
+  await renderMasterBoard();
+}
+
+async function renderMasterHistory() {
+  const list = document.getElementById('masterHistoryList');
+  if (!list) return;
+  const remote = await getMasterHistoryItems();
+  if (remote === null) {
+    list.innerHTML = '<div class="chat-empty">改訂履歴を読み込めませんでした。テーブル設定を確認してください。</div>';
+    return;
+  }
+  masterHistoryItems = remote;
+  if (!masterHistoryItems.length) {
+    list.innerHTML = '<div class="chat-empty">改訂履歴はまだありません。</div>';
+    return;
+  }
+  list.innerHTML = masterHistoryItems.slice().reverse().map(item => `
+    <div class="master-history-item">
+      <div class="master-history-date">${item.date || ''}</div>
+      <div class="master-history-text">${item.text || ''}</div>
+    </div>
+  `).join('');
+}
+
+async function addMasterHistoryNote() {
+  const input = document.getElementById('masterHistoryInput');
+  const pwInput = document.getElementById('masterHistoryPw');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  const entered = (pwInput?.value || '').trim();
+  if (entered !== MASTER_HISTORY_PASSWORD) {
+    showToast('改訂履歴のパスワードが違います');
+    return;
+  }
+
+  const saved = await addMasterHistoryItem(text);
+  if (!saved) {
+    showToast('改訂履歴の保存に失敗しました（Supabase設定を確認）');
+    return;
+  }
+  input.value = '';
+  if (pwInput) pwInput.value = '';
+  await renderMasterHistory();
+}
+
 function resetPoyoModal() {
   document.getElementById('poyoModeSelect').style.display = 'block';
   document.getElementById('poyoMoodView').style.display   = 'none';
@@ -2935,6 +3282,71 @@ function previewImage(inputId, previewId) {
   </div>
 </div>
 
+<!-- master モーダル -->
+<div class="modal-overlay" id="masterModal" onclick="closeMasterModal(event)">
+  <div class="modal-box" id="masterModalBox" style="max-width:540px;">
+    <div class="modal-header">
+      <div style="font-family:var(--serif);font-size:16px;font-weight:700;" id="masterModalTitle">喫茶マスター</div>
+      <button class="modal-close" onclick="closeMasterModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="masterModeSelect">
+        <div class="poyo-modal-balloon">いらっしゃい。今日は何を話そうか？</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+          <button class="poyo-mode-btn" onclick="switchMasterMode('board')">
+            ① 掲示板
+            <span>みんなと話す</span>
+          </button>
+          <button class="poyo-mode-btn" onclick="switchMasterMode('history')">
+            ② 気まぐれ改訂履歴
+            <span>管理人が書いたり書かなかったり</span>
+          </button>
+          <button class="poyo-mode-btn" onclick="switchMasterMode('help')">
+            ③ 本サイトの使い方
+            <span>迷ったときの使い方ガイド</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="masterBoardView" style="display:none;">
+        <div class="master-board-list" id="masterBoardList"></div>
+        <div class="chat-input-row" style="margin-top:12px;">
+          <input type="text" id="masterBoardName" placeholder="名前（任意）"
+            style="font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 10px;outline:none;width:120px;flex-shrink:0;">
+          <input type="text" id="masterBoardInput" placeholder="ひとこと書いてみる..."
+            style="font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 12px;outline:none;min-width:0;flex:1;"
+            onkeydown="if(event.key==='Enter')sendMasterBoardPost()">
+          <button class="chat-send" onclick="sendMasterBoardPost()">投稿</button>
+        </div>
+        <button class="poyo-retry" style="margin-top:10px;" onclick="resetMasterModal()">← 戻る</button>
+      </div>
+
+      <div id="masterHistoryView" style="display:none;">
+        <div class="master-board-list" id="masterHistoryList"></div>
+        <div class="chat-input-row" style="margin-top:12px;">
+          <input type="password" id="masterHistoryPw" placeholder="改訂用PW"
+            style="font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 10px;outline:none;width:120px;flex-shrink:0;">
+          <input type="text" id="masterHistoryInput" placeholder="改訂メモを追加（任意）"
+            style="font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 12px;outline:none;min-width:0;flex:1;"
+            onkeydown="if(event.key==='Enter')addMasterHistoryNote()">
+          <button class="chat-send" onclick="addMasterHistoryNote()">追加</button>
+        </div>
+        <button class="poyo-retry" style="margin-top:10px;" onclick="resetMasterModal()">← 戻る</button>
+      </div>
+
+      <div id="masterHelpView" style="display:none;">
+        <div class="poyo-modal-balloon" style="margin-bottom:10px;">ざっくり3ステップで使えます。</div>
+        <ol class="master-help-list">
+          <li>「書店一覧」から気になる棚を開いて、本を投稿・閲覧します。</li>
+          <li>カードのリアクションや💬コメントで、感想を気軽に残します。</li>
+          <li>「投稿する」ページからも新規投稿でき、必要なら編集・削除用パスワードを設定します。</li>
+        </ol>
+        <button class="poyo-retry" style="margin-top:10px;" onclick="resetMasterModal()">← 戻る</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- poyo キャラ -->
 <div class="poyo-wrap" id="poyoWrap">
   <div class="poyo-balloon-wrap" id="poyoBalloon"></div>
@@ -2943,6 +3355,15 @@ function previewImage(inputId, previewId) {
   <div class="poyo-img-fallback" style="display:none" onclick="openPoyoModal()">🐾</div>
 </div>
 <button class="poyo-call-btn" id="poyoCallBtn" data-label="Hey👐Poyo" onclick="togglePoyoPresence()">🔔</button>
+
+<!-- master キャラ -->
+<div class="master-wrap" id="masterWrap">
+  <div class="master-balloon-wrap" id="masterBalloon"></div>
+  <img src="images/master.png" class="master-img" alt="master" onclick="openMasterModal()"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+  <div class="master-img-fallback" style="display:none" onclick="openMasterModal()">☕</div>
+</div>
+<button class="master-call-btn" id="masterCallBtn" data-label="マスターと話す" onclick="toggleMasterPresence()">☕</button>
 
 
 </body>
