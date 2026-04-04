@@ -272,9 +272,48 @@ nav button.active { color: var(--accent); font-weight: 500; }
   position: absolute; top: 10px; right: 10px; display: flex; gap: 6px;
   opacity: 0; transform: translateY(-4px); pointer-events: none; transition: all .18s ease;
 }
+.book-comment-btn {
+  position: absolute; top: 10px; left: 10px;
+  width: 30px; height: 30px;
+  border: 1px solid var(--border); border-radius: 50%;
+  background: rgba(253,250,245,.96); color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer;
+  box-shadow: 0 3px 10px rgba(28,26,23,.08);
+  transition: all .2s;
+}
+.book-comment-btn:hover {
+  border-color: var(--accent); transform: translateY(-1px) scale(1.04);
+  background: white;
+}
 .book-card:hover .book-reaction-picker,
 .all-books-list-item:hover .book-reaction-picker {
   opacity: 1; transform: translateY(0); pointer-events: auto;
+}
+.book-comment-list {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.book-comment-item {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.book-comment-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.book-comment-text {
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .reaction-btn {
   position: relative; display: inline-flex; align-items: center; justify-content: center;
@@ -414,6 +453,12 @@ nav button.active { color: var(--accent); font-weight: 500; }
   cursor: pointer; font-family: var(--sans); transition: opacity .2s; white-space: nowrap;
 }
 .btn-delete-confirm:hover { opacity: .8; }
+.btn-edit {
+  font-size: 11px; color: #1B517F; background: #E6F1FB;
+  border: 1px solid #B8D7F2; border-radius: 4px; padding: 4px 10px;
+  cursor: pointer; font-family: var(--sans); transition: opacity .2s; white-space: nowrap;
+}
+.btn-edit:hover { opacity: .85; }
 .yomitai-actions { display: flex; align-items: center; gap: 8px; }
  .furubon-grid {
   display: grid;
@@ -844,6 +889,19 @@ nav button.active { color: var(--accent); font-weight: 500; }
 .poyo-retry { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 8px 16px; font-family: var(--sans); font-size: 13px; color: var(--muted); cursor: pointer; margin-top: 12px; transition: all .2s; }
 .poyo-retry:hover { border-color: var(--ink); color: var(--ink); }
 
+.book-preview-list { display: grid; gap: 10px; }
+.book-preview-item {
+  background: var(--cream); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px;
+}
+.book-preview-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.book-preview-value { font-size: 13px; color: var(--ink); line-height: 1.6; word-break: break-word; }
+.book-preview-alert {
+  margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid #E4C89D; background: #FFF7EA;
+  color: #6C4A13; font-size: 12px; line-height: 1.7;
+}
+
 /* ─── STORE TABS ─── */
 .store-tabs {
   display: flex; border-bottom: 2px solid var(--border); margin-bottom: 28px;
@@ -994,6 +1052,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
         <div class="form-group full">
           <label>Honya Club URL（任意）</label>
           <input type="url" id="d-url" placeholder="https://honto.jp/...">
+          <div style="font-size:12px;color:var(--muted);line-height:1.6;"><a href="https://www.honyaclub.com/shop/default.aspx" target="_blank" rel="noopener">HonyaClubをひらく</a></div>
         </div>
         <div class="form-group full">
           <label>表紙画像（任意・1.5MB以下）</label>
@@ -1005,12 +1064,13 @@ nav button.active { color: var(--accent); font-weight: 500; }
           <img id="d-image-preview" class="img-preview-thumb" style="display:none">
         </div>
         <div class="form-group full">
-          <label>削除用パスワード（任意）</label>
-          <input type="password" id="d-pw" placeholder="設定しておくと後で削除できます">
+          <label>編集・削除用パスワード（任意）</label>
+          <input type="password" id="d-pw" placeholder="設定しておくと後で編集・削除できます">
         </div>
       </div>
-      <button class="form-submit" onclick="submitBook('detail')">この書店に投稿する</button>
-      <p class="form-note">※ 投稿はみんなに共有されます</p>
+      <button class="form-submit" id="d-submit-btn" onclick="openBookPreview('detail')">この書店に投稿する</button>
+      <button class="btn-cancel" id="d-cancel-edit-btn" style="display:none;width:100%;margin-top:8px;" onclick="cancelBookEdit()">編集をやめる</button>
+      <p class="form-note" id="d-form-note">※ 投稿はみんなに共有されます</p>
     </div>
   </div>
 </div>
@@ -1053,6 +1113,7 @@ nav button.active { color: var(--accent); font-weight: 500; }
         <div class="form-group full">
           <label>Honya Club URL（任意）</label>
           <input type="url" id="p-url" placeholder="https://honto.jp/...">
+          <div style="font-size:12px;color:var(--muted);line-height:1.6;"><a href="https://www.honyaclub.com/shop/default.aspx" target="_blank" rel="noopener">HonyaClubをひらく</a></div>
         </div>
         <div class="form-group full">
           <label>表紙画像（任意・1.5MB以下）</label>
@@ -1064,11 +1125,11 @@ nav button.active { color: var(--accent); font-weight: 500; }
           <img id="p-image-preview" class="img-preview-thumb" style="display:none">
         </div>
         <div class="form-group full">
-          <label>削除用パスワード（任意）</label>
-          <input type="password" id="p-pw" placeholder="設定しておくと後で削除できます">
+          <label>編集・削除用パスワード（任意）</label>
+          <input type="password" id="p-pw" placeholder="設定しておくと後で編集・削除できます">
         </div>
       </div>
-      <button class="form-submit" onclick="submitBook('post')">投稿する</button>
+      <button class="form-submit" onclick="openBookPreview('post')">投稿する</button>
       <p class="form-note">※ 投稿はみんなで共有されます。直感で書店を選んでOKです。</p>
     </div>
   </div>
@@ -1260,6 +1321,17 @@ async function addBook(book) {
 async function deleteBookById(id) {
   await sbFetch('books?id=eq.' + id, { method: 'DELETE' });
 }
+async function updateBookById(id, book) {
+  await sbFetch('books?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      store_id: book.storeId, title: book.title, author: book.author,
+      publisher: book.publisher, poster: book.poster, point: book.point,
+      url: book.url, password: book.password, image: book.image,
+    }),
+  });
+}
 async function updateBookReaction(id, column, value) {
   await sbFetch('books?id=eq.' + id, {
     method: 'PATCH',
@@ -1383,6 +1455,61 @@ async function addChat(bookId, name, text) {
   });
 }
 
+function getLocalBookComments(bookId) {
+  const key = 'book-comments:' + bookId;
+  return JSON.parse(localStorage.getItem(key) || '[]');
+}
+
+function addLocalBookComment(bookId, name, text) {
+  const key = 'book-comments:' + bookId;
+  const current = getLocalBookComments(bookId);
+  current.push({
+    id: 'local-' + Date.now(),
+    name: name || '匿名',
+    text,
+    createdAt: new Date().toISOString(),
+  });
+  localStorage.setItem(key, JSON.stringify(current));
+}
+
+async function getBookComments(bookId) {
+  if (bookCommentsUseLocal) {
+    return getLocalBookComments(bookId);
+  }
+  const data = await sbFetch('book_comments?book_id=eq.' + bookId + '&order=created_at.asc');
+  if (data === null) {
+    bookCommentsUseLocal = true;
+    return getLocalBookComments(bookId);
+  }
+  return (data || []).map(c => ({
+    id: String(c.id),
+    name: c.name || '匿名',
+    text: c.text || '',
+    createdAt: c.created_at,
+  }));
+}
+
+async function addBookComment(bookId, name, text) {
+  if (bookCommentsUseLocal) {
+    addLocalBookComment(bookId, name, text);
+    return true;
+  }
+  const result = await sbFetch('book_comments', {
+    method: 'POST',
+    headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      book_id: bookId,
+      name: name || '匿名',
+      text,
+    }),
+  });
+  if (result === null) {
+    bookCommentsUseLocal = true;
+    addLocalBookComment(bookId, name, text);
+  }
+  return true;
+}
+
 // ─── furubon（古本屋）Supabase版 ─────────────────────
 async function getFurubon() {
   const data = await sbFetch('furubon?select=*&order=created_at.asc&done=eq.false');
@@ -1425,10 +1552,15 @@ let currentStore = null;
 let heroIndex = 0;
 let heroTimer = null;
 let pendingProtectedAction = null;
+let pendingBookPreview = null;
+let editingBookState = null;
+let currentBookCommentId = null;
+let bookCommentsUseLocal = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   buildHero();
   populateStoreSelect();
+  updateDetailFormMode();
   startPoyo();
   await buildFurubonGrid();
   await refreshAll();
@@ -1581,6 +1713,7 @@ async function buildBookGrid(storeId) {
   }
   grid.innerHTML = books.slice().reverse().map(b => `
     <div class="book-card">
+      <button class="book-comment-btn" type="button" onclick="openBookCommentModal('${b.id}')" title="コメント">💬</button>
       ${renderReactionPicker(b, 'detail')}
       ${b.image
         ? `<img class="book-thumb" src="${b.image}" alt="">`
@@ -1596,6 +1729,7 @@ async function buildBookGrid(storeId) {
         ${renderReactionSummary(b)}
         ${`
         <div class="delete-row">
+          <button class="btn-edit" onclick="editBook('${b.id}','${storeId}')">編集</button>
           <button class="btn-delete-confirm" onclick="deleteBook('${b.id}','${storeId}')">削除</button>
         </div>`}
       </div>
@@ -1693,34 +1827,177 @@ async function handleReactionClick(bookId, reactionKey, currentCount, context, s
   }
 }
 
-// ─── SUBMIT ──────────────────────────────────────────
-async function submitBook(mode) {
+// ─── SUBMIT / PREVIEW ────────────────────────────────
+function updateDetailFormMode() {
+  const submitBtn = document.getElementById('d-submit-btn');
+  const cancelBtn = document.getElementById('d-cancel-edit-btn');
+  const note = document.getElementById('d-form-note');
+  if (!submitBtn || !cancelBtn || !note) return;
+  if (editingBookState) {
+    submitBtn.textContent = '更新内容を確認する';
+    cancelBtn.style.display = 'block';
+    note.textContent = '※ 編集内容はみんなに共有されます';
+  } else {
+    submitBtn.textContent = 'この書店に投稿する';
+    cancelBtn.style.display = 'none';
+    note.textContent = '※ 投稿はみんなに共有されます';
+  }
+}
+
+function clearBookForm(prefix) {
+  ['title','author','publisher','name','point','url','pw'].forEach(f => {
+    const el = document.getElementById(prefix + f);
+    if (el) el.value = '';
+  });
+  const imgEl = document.getElementById(prefix + 'image');
+  if (imgEl) imgEl.value = '';
+  const prevEl = document.getElementById(prefix + 'image-preview');
+  if (prevEl) {
+    prevEl.src = '';
+    prevEl.style.display = 'none';
+  }
+}
+
+async function collectBookDraft(mode) {
   const prefix  = mode === 'detail' ? 'd-' : 'p-';
   const title   = document.getElementById(prefix+'title').value.trim();
   const storeId = mode === 'detail' ? currentStore?.id : document.getElementById('p-store').value;
   if (!title)   { showToast('書名を入力してください'); return; }
   if (!storeId) { showToast('書店を選んでください'); return; }
   const imgFile = document.getElementById(prefix+'image')?.files[0] || null;
-  const image   = await readImageAsBase64(imgFile);
+  let image = '';
+  if (imgFile) {
+    image = await readImageAsBase64(imgFile);
+  } else if (mode === 'detail' && editingBookState?.id) {
+    image = editingBookState.originalImage || '';
+  }
   const pw      = document.getElementById(prefix+'pw')?.value.trim() || '';
-  await addBook({
+  return {
     storeId, title, image, password: pw,
     author:    document.getElementById(prefix+'author').value.trim(),
     publisher: document.getElementById(prefix+'publisher').value.trim(),
     poster:    document.getElementById(prefix+'name').value.trim(),
     point:     document.getElementById(prefix+'point').value.trim(),
     url:       document.getElementById(prefix+'url').value.trim(),
-  });
-  ['title','author','publisher','name','point','url','pw'].forEach(f => {
-    const el = document.getElementById(prefix+f); if (el) el.value = '';
-  });
-  const imgEl  = document.getElementById(prefix+'image'); if (imgEl) imgEl.value = '';
-  const prevEl = document.getElementById(prefix+'image-preview');
-  if (prevEl) prevEl.style.display = 'none';
-  showToast('📚 投稿しました！');
-  if (mode === 'detail') await buildBookGrid(storeId);
+  };
+}
+
+async function openBookPreview(mode) {
+  const draft = await collectBookDraft(mode);
+  if (!draft) return;
+
+  pendingBookPreview = { mode, draft };
+  const store = STORES.find(s => s.id === draft.storeId);
+  const storeName = store ? `${store.icon} ${store.name}` : draft.storeId;
+  const submitLabel = editingBookState && mode === 'detail' ? 'この内容で更新する' : 'このまま投稿する';
+
+  document.getElementById('bookPreviewStore').textContent = storeName;
+  document.getElementById('bookPreviewTitle').textContent = draft.title;
+  document.getElementById('bookPreviewAuthor').textContent = draft.author || '未入力';
+  document.getElementById('bookPreviewPublisher').textContent = draft.publisher || '未入力';
+  document.getElementById('bookPreviewPoint').textContent = draft.point || '未入力';
+  document.getElementById('bookPreviewPoster').textContent = draft.poster || '匿名';
+  document.getElementById('bookPreviewUrl').innerHTML = draft.url
+    ? `<a href="${draft.url}" target="_blank" rel="noopener">${draft.url}</a>`
+    : '未入力';
+
+  const imgWrap = document.getElementById('bookPreviewImageWrap');
+  if (draft.image) {
+    imgWrap.innerHTML = `<img src="${draft.image}" alt="preview" style="width:86px;height:118px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">`;
+  } else {
+    imgWrap.innerHTML = `<div style="width:86px;height:118px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;">📖</div>`;
+  }
+
+  document.getElementById('bookPreviewConfirmBtn').textContent = submitLabel;
+  document.getElementById('bookPreviewModal').classList.add('open');
+}
+
+function closeBookPreviewModal(e) {
+  if (e && e.target !== document.getElementById('bookPreviewModal')) return;
+  document.getElementById('bookPreviewModal').classList.remove('open');
+  pendingBookPreview = null;
+}
+
+async function confirmBookPreviewSubmit() {
+  if (!pendingBookPreview) return;
+  const { mode, draft } = pendingBookPreview;
+
+  if (editingBookState && mode === 'detail') {
+    await updateBookById(editingBookState.id, draft);
+    showToast('✏️ 更新しました！');
+    editingBookState = null;
+    updateDetailFormMode();
+    clearBookForm('d-');
+  } else {
+    await addBook(draft);
+    showToast('📚 投稿しました！');
+    clearBookForm(mode === 'detail' ? 'd-' : 'p-');
+  }
+
+  if (mode === 'detail') await buildBookGrid(draft.storeId);
   await buildStoreGrid();
   await buildNewsList();
+
+  pendingBookPreview = null;
+  document.getElementById('bookPreviewModal').classList.remove('open');
+}
+
+async function editBook(bookId, storeId) {
+  openProtectedActionModal({
+    title: '編集確認',
+    description: 'この本を編集しますか？',
+    buttonLabel: '編集する',
+    actionType: 'book-edit',
+    targetId: bookId,
+    storeId,
+  });
+}
+
+async function startBookEdit(bookId, storeId) {
+  const books = await getBooks();
+  const book = books.find(b => b.id === bookId);
+  if (!book) return;
+
+  if (!currentStore || currentStore.id !== storeId) {
+    await openStore(storeId);
+  }
+
+  document.getElementById('d-title').value = book.title || '';
+  document.getElementById('d-author').value = book.author || '';
+  document.getElementById('d-publisher').value = book.publisher || '';
+  document.getElementById('d-name').value = book.poster || '';
+  document.getElementById('d-point').value = book.point || '';
+  document.getElementById('d-url').value = book.url || '';
+  document.getElementById('d-pw').value = book.password || '';
+
+  const prevEl = document.getElementById('d-image-preview');
+  if (prevEl) {
+    if (book.image) {
+      prevEl.src = book.image;
+      prevEl.style.display = 'block';
+    } else {
+      prevEl.src = '';
+      prevEl.style.display = 'none';
+    }
+  }
+  const imgEl = document.getElementById('d-image');
+  if (imgEl) imgEl.value = '';
+
+  editingBookState = {
+    id: book.id,
+    storeId: book.storeId,
+    originalImage: book.image || '',
+  };
+  updateDetailFormMode();
+  document.querySelector('#page-store .form-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast('✏️ 編集モードに入りました');
+}
+
+function cancelBookEdit() {
+  editingBookState = null;
+  updateDetailFormMode();
+  clearBookForm('d-');
+  showToast('編集をキャンセルしました');
 }
 
 // ─── UTILS ───────────────────────────────────────────
@@ -2098,6 +2375,50 @@ function closeChatModal(e) {
   }
 }
 
+// ─── おすすめ本コメント ──────────────────────────────
+async function openBookCommentModal(bookId) {
+  currentBookCommentId = bookId;
+  const books = await getBooks();
+  const book = books.find(b => b.id === bookId);
+  if (!book) return;
+  document.getElementById('bookCommentTitle').textContent = `💬 ${book.title}`;
+  document.getElementById('bookCommentSub').textContent = `${book.author || '著者不明'}${book.poster ? ' ／ by ' + book.poster : ''}`;
+  document.getElementById('bookCommentMsgInput').value = '';
+  await renderBookComments(bookId);
+  document.getElementById('bookCommentModal').classList.add('open');
+}
+
+async function renderBookComments(bookId) {
+  const comments = await getBookComments(bookId);
+  const el = document.getElementById('bookCommentList');
+  if (!comments.length) {
+    el.innerHTML = '<div class="chat-empty">まだコメントがありません。最初のコメントを書いてみよう！</div>';
+    return;
+  }
+  el.innerHTML = comments.map(c => `
+    <div class="book-comment-item">
+      <div class="book-comment-meta">${c.name || '匿名'} ・ ${formatDate(c.createdAt)}</div>
+      <div class="book-comment-text">${c.text || ''}</div>
+    </div>
+  `).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendBookComment() {
+  const text = document.getElementById('bookCommentMsgInput').value.trim();
+  if (!text || !currentBookCommentId) return;
+  const name = document.getElementById('bookCommentName').value.trim();
+  await addBookComment(currentBookCommentId, name, text);
+  document.getElementById('bookCommentMsgInput').value = '';
+  await renderBookComments(currentBookCommentId);
+}
+
+function closeBookCommentModal(e) {
+  if (e && e.target !== document.getElementById('bookCommentModal')) return;
+  document.getElementById('bookCommentModal').classList.remove('open');
+  currentBookCommentId = null;
+}
+
 // ─── poyo ────────────────────────────────────────────
 const POYO_LINES = [
   '今日はどんな本を読もうかな～',
@@ -2264,7 +2585,9 @@ function openProtectedActionModal({ title, description, buttonLabel, actionType,
   document.getElementById('deleteModalDesc').textContent = description;
   document.getElementById('deletePwLabel').textContent = actionType === 'furubon-done'
     ? '取引完了用パスワード'
-    : '削除用パスワード';
+    : (actionType === 'book-delete' || actionType === 'book-edit')
+      ? '編集・削除用パスワード'
+      : '削除用パスワード';
   document.getElementById('deleteModalNote').textContent = actionType === 'furubon-done'
     ? '取引完了にすると、この出品カードは本の市の一覧から表示されなくなります。'
     : '';
@@ -2280,7 +2603,7 @@ async function confirmDelete() {
   if (!pendingProtectedAction) return;
   const entered = document.getElementById('deletePwInput').value;
   let target = null;
-  if (pendingProtectedAction.actionType === 'book-delete') {
+  if (pendingProtectedAction.actionType === 'book-delete' || pendingProtectedAction.actionType === 'book-edit') {
     const books = await getBooks();
     target = books.find(b => b.id === pendingProtectedAction.targetId);
   } else if (pendingProtectedAction.actionType === 'yomitai-delete') {
@@ -2305,6 +2628,8 @@ async function confirmDelete() {
     await buildBookGrid(pendingProtectedAction.storeId);
     await buildStoreGrid();
     await buildNewsList();
+  } else if (pendingProtectedAction.actionType === 'book-edit') {
+    await startBookEdit(pendingProtectedAction.targetId, pendingProtectedAction.storeId);
   } else if (pendingProtectedAction.actionType === 'yomitai-delete') {
     await deleteYomitaiById(pendingProtectedAction.targetId);
     showToast('🗑️ 削除しました');
@@ -2452,6 +2777,32 @@ function previewImage(inputId, previewId) {
   </div>
 </div>
 
+<!-- おすすめ本コメント モーダル -->
+<div class="modal-overlay" id="bookCommentModal" onclick="closeBookCommentModal(event)">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header">
+      <div>
+        <div style="font-family:var(--serif);font-size:16px;font-weight:700;" id="bookCommentTitle"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="bookCommentSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeBookCommentModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="book-comment-list" id="bookCommentList"></div>
+    </div>
+    <div style="padding:0 20px 16px;flex-shrink:0;">
+      <div class="chat-input-row">
+        <input type="text" id="bookCommentName" placeholder="名前（任意）"
+          style="font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 10px;outline:none;width:120px;flex-shrink:0;">
+        <input type="text" id="bookCommentMsgInput" placeholder="コメントを入力..."
+          style="font-family:var(--sans);font-size:13px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:9px 12px;outline:none;min-width:0;flex:1;"
+          onkeydown="if(event.key==='Enter')sendBookComment()">
+        <button class="chat-send" onclick="sendBookComment()">送信</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 削除確認モーダル -->
 <div class="modal-overlay" id="deleteModal" onclick="closeDeleteModal(event)">
   <div class="modal-box" style="max-width:400px;">
@@ -2473,6 +2824,59 @@ function previewImage(inputId, previewId) {
     <div style="padding:0 20px 16px;display:flex;gap:10px;justify-content:flex-end;">
       <button onclick="closeDeleteModal()" style="padding:8px 16px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--muted);">キャンセル</button>
       <button id="deleteConfirmBtn" onclick="confirmDelete()" style="padding:8px 16px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 投稿プレビューモーダル -->
+<div class="modal-overlay" id="bookPreviewModal" onclick="closeBookPreviewModal(event)">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header">
+      <div>
+        <div style="font-family:var(--serif);font-size:16px;font-weight:700;">投稿プレビュー</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">内容を確認してから投稿できます</div>
+      </div>
+      <button class="modal-close" onclick="closeBookPreviewModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="book-preview-list">
+        <div class="book-preview-item" style="display:flex;gap:12px;align-items:flex-start;">
+          <div id="bookPreviewImageWrap"></div>
+          <div style="flex:1;">
+            <div class="book-preview-label">書店</div>
+            <div class="book-preview-value" id="bookPreviewStore"></div>
+          </div>
+        </div>
+        <div class="book-preview-item">
+          <div class="book-preview-label">書名</div>
+          <div class="book-preview-value" id="bookPreviewTitle"></div>
+        </div>
+        <div class="book-preview-item">
+          <div class="book-preview-label">著者名</div>
+          <div class="book-preview-value" id="bookPreviewAuthor"></div>
+        </div>
+        <div class="book-preview-item">
+          <div class="book-preview-label">出版社名</div>
+          <div class="book-preview-value" id="bookPreviewPublisher"></div>
+        </div>
+        <div class="book-preview-item">
+          <div class="book-preview-label">おすすめポイント</div>
+          <div class="book-preview-value" id="bookPreviewPoint"></div>
+        </div>
+        <div class="book-preview-item">
+          <div class="book-preview-label">投稿者名</div>
+          <div class="book-preview-value" id="bookPreviewPoster"></div>
+        </div>
+        <div class="book-preview-item">
+          <div class="book-preview-label">Honya Club URL</div>
+          <div class="book-preview-value" id="bookPreviewUrl"></div>
+        </div>
+      </div>
+      <div class="book-preview-alert">⚠ 個人を特定できる情報は入力していませんか？</div>
+    </div>
+    <div style="padding:0 20px 16px;display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeBookPreviewModal()" style="padding:8px 16px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--muted);">入力を編集する</button>
+      <button id="bookPreviewConfirmBtn" onclick="confirmBookPreviewSubmit()" style="padding:8px 16px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">このまま投稿する</button>
     </div>
   </div>
 </div>
